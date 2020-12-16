@@ -1,8 +1,10 @@
 import React, { FunctionComponent, ReactNode, useEffect, useMemo, useReducer, useState } from 'react'
-import { ICard } from '../types'
+import { ICard, IMode, IPlayCard } from '../types'
 import { Card } from './Card'
 import { Grid, IconButton } from '@material-ui/core'
-import { Place, PlayArrow, Visibility } from '@material-ui/icons'
+import { Delete, Place, PlayArrow, Remove, Visibility } from '@material-ui/icons'
+import { PlayCardPayload } from '../GameAction'
+import { Equal, NotEqual } from 'mdi-material-ui'
 
 const DURATION = 0.3
 
@@ -23,9 +25,15 @@ const PlaceHolder: FunctionComponent<{ maxWidth: string }> = ({ maxWidth }) => {
   )
 }
 
+export enum ChooseCardFor {
+  FIRST_PLAY,
+  RESPOND_PLAY,
+  DISCARD
+}
+
 export const Deck: FunctionComponent<{
-  cards: ICard[], hide: boolean, reveal: () => void, onCardClick: (card: ICard) => Promise<void>
-}> = ({ cards, hide, reveal }) => {
+  cards: ICard[], hide: boolean, reveal: () => void, onCardsChoose: (payload: PlayCardPayload) => Promise<void>, chooseCardFor: ChooseCardFor
+}> = ({ cards, hide, reveal, onCardsChoose, chooseCardFor }) => {
   const [playedIndices, setPlayedIndices] = useState<number[]>([])
   const [hovering, setHovering] = useState<number | null>(null)
   const [playGetCardAnimation, setPlayGetCardAnimation] = useState(false)
@@ -57,18 +65,24 @@ export const Deck: FunctionComponent<{
       dispatchSelected({ type: 'add', payload: index })
     }
   }
-  const handlePlayCards = () => {
-    console.log(selected)
-    setHovering(null)
-    setPlayedIndices(Array.from(selected))
-    dispatchSelected({ type: 'clear' })
-    setTimeout(() => {
-      setPlayGetCardAnimation(true)
-    }, 1)
-    setTimeout(() => {
-      setPlayGetCardAnimation(false)
-      setPlayedIndices([])
-    }, 500)
+  const handlePlayCards = (param: unknown) => {
+    const mode = param === IMode.HOMO ||param === IMode.HETERO ? param : undefined
+    onCardsChoose({ cards: cards.filter((_, k) => selected.has(k)), mode })
+      .then(() => {
+        setHovering(null)
+        setPlayedIndices(Array.from(selected))
+        dispatchSelected({ type: 'clear' })
+        setTimeout(() => {
+          setPlayGetCardAnimation(true)
+        }, 1)
+        setTimeout(() => {
+          setPlayGetCardAnimation(false)
+          setPlayedIndices([])
+        }, 500)
+      })
+      .catch(e => {
+        console.error(e)
+      })
   }
   const getPlayedCards = () => {
     const cardsToRender = []
@@ -107,26 +121,51 @@ export const Deck: FunctionComponent<{
     transition: `transform ${DURATION}s ease-in-out`,
     pointerEvents: 'none'
   }}>
-    {hide && <IconButton onClick={reveal} style={{
+    <div style={{
+      textAlign: 'center',
       transform: 'translateY(-100%)',
       margin: 'auto',
       display: 'block',
       pointerEvents: 'all'
-    }}><Visibility/></IconButton>}
-    {!hide && <IconButton
-      title='play'
-      onClick={handlePlayCards}
-      style={{
-      transform: 'translateY(-100%)',
-      margin: 'auto',
-      display: 'block',
-      pointerEvents: 'all'
-    }}><PlayArrow/></IconButton>}
+    }}>
+      {hide && <IconButton onClick={reveal}>
+        <Visibility/>
+      </IconButton>}
+      {!hide && chooseCardFor === ChooseCardFor.RESPOND_PLAY && <IconButton
+        title='play'
+        onClick={handlePlayCards}
+      >
+        <PlayArrow/>
+      </IconButton>}
+      {!hide && chooseCardFor === ChooseCardFor.FIRST_PLAY && <>
+        <IconButton
+          title='homo'
+          onClick={() => handlePlayCards(IMode.HOMO)}
+        >
+          <Equal/>
+        </IconButton>
+        <IconButton
+          title='hetero'
+          onClick={() => handlePlayCards(IMode.HETERO)}
+        >
+          <NotEqual/>
+        </IconButton>
+      </>}
+      {!hide && chooseCardFor === ChooseCardFor.DISCARD && <>
+        <IconButton
+          title='trash'
+          onClick={handlePlayCards}
+        >
+          <Delete/>
+        </IconButton>
+      </>}
+
+    </div>
     <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'nowrap' }}>
       {
         getPlayedCards().map((card, index) => (
           card === null
-            ? <PlaceHolder maxWidth={`calc(100vw / ${cards.length + 2} + 16px)`}/>
+            ? <PlaceHolder key={index} maxWidth={`calc(100vw / ${cards.length + 2} + 16px)`}/>
             : withMaxWidth(<Card
               card={card}
               onClick={() => handleCardClick(card, index)}
@@ -135,7 +174,7 @@ export const Deck: FunctionComponent<{
               selected={selected.has(index)}
             />, index)))
       }
-      {playedIndices.length > 0 && <div style={{
+      {playedIndices.length > 0 && chooseCardFor !== ChooseCardFor.DISCARD && <div style={{
         maxWidth: playGetCardAnimation ? `calc((100vw / ${cards.length + 2} + 16px) * ${playedIndices.length})` : '0',
         transition: 'max-width 0.3s ease-in-out',
         display: 'flex',

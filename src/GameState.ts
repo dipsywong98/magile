@@ -13,7 +13,7 @@ export class GameState extends GenericBoardGameState {
   direction = 1
   points = 0
   drawDeck: IDeck = []
-  playedDeck: IDeck = []
+  stage: IDeck = []
   mode: IMode | null = null
   trashDeck: IDeck = []
   playerDeck: IDeck[] = []

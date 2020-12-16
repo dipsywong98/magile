@@ -3,7 +3,7 @@ import React from 'react'
 
 export const en = {
   ...gamenetI18n.en,
-  poker99: 'Magile',
+  magile: 'Magile',
   howToPlay: 'How To Play',
   howToPlayContent: (
     <div>

@@ -44,7 +44,7 @@ const withInitGame: IStateMapper = (prevState: GameState) => {
     direction: 1,
     points: 0,
     drawDeck: [],
-    playedDeck: [],
+    stage: [],
     mode: null,
     trashDeck: [],
     playerDeck: [],
@@ -85,18 +85,18 @@ const withDiscardCard: IPlayCard = ({ cards }, playerId) => state => {
 }
 
 const withPutToPlayed: IPlayCard = ({ cards }) => (state) => {
-  return { ...state, playedDeck: [...state.playedDeck, ...cards] }
+  return { ...state, stage: [...state.stage, ...cards] }
 }
 
 const withCardNumberValidation: IPlayCard = (_, playerId) => (state) => {
-  if (state.playedDeck[playerId].length > state.playerHp[playerId]) {
+  if (state.playerDeck[playerId].length > state.playerHp[playerId]) {
     throw new Error(`Player deck amount is greater than his hp, please discard`)
   }
   return state
 }
 
 const withFirstPlayValidation: IPlayCard = ({ cards, mode }, playerId) => (state) => {
-  if (state.playedDeck.length === 0) {
+  if (state.stage.length === 0) {
     if (mode === null || mode === undefined) {
       throw new Error('please specify homo transfer or hetero transfer as the first to transfer')
     }
@@ -113,22 +113,23 @@ const withFirstPlayValidation: IPlayCard = ({ cards, mode }, playerId) => (state
 
 const withPlayHomo: IPlayCard = ({ cards }) => state => {
   if (state.mode === IMode.HOMO && !state.ignited) {
-    if (state.playedDeck.length === 0) {
+    if (state.stage.length === 0) {
       return { ...state }
     }
-    if ((cards.length === 1 || cards.length === 3) && areCardsOfColor(cards, getCardColor(state.playedDeck[0]))) {
+    if ((cards.length === 1 || cards.length === 3) && areCardsOfColor(cards, getCardColor(state.stage[0]))) {
       return { ...state }
     }
   }
+  console.log('not play homo')
   return state
 }
 
 const withPlayHetero: IPlayCard = ({ cards }) => state => {
   if (state.mode === IMode.HETERO && !state.ignited) {
-    if (state.playedDeck.length === 0) {
+    if (state.stage.length === 0) {
       return { ...state }
     }
-    if ((cards.length === 1 || cards.length === 3) && !hasCardColorNone(cards) && areCardsOfDifferentColor([...state.playedDeck, ...cards])) {
+    if ((cards.length === 1 || cards.length === 3) && !hasCardColorNone(cards) && areCardsOfDifferentColor([...state.stage, ...cards])) {
       return { ...state }
     }
   }
@@ -158,7 +159,7 @@ const withPlayAngleGuard: IPlayCard = ({ cards }) => state => {
 }
 
 const withStateChangedValidation = (prevState: GameState): IPlayCard => () => state => {
-  if (prevState !== state) {
+  if (prevState === state) {
     throw new Error('invalid move')
   }
   return state
@@ -174,6 +175,7 @@ const withPlayCard: (playerId: number, payload: PlayCardPayload) => IStateMapper
     throw new Error('not your turn')
   }
   const nextState = compose(
+    withCheckWin,
     withCheckHit,
     withIncrementTurn,
     withDrawCard(playerId),
@@ -192,6 +194,14 @@ const withPlayCard: (playerId: number, payload: PlayCardPayload) => IStateMapper
   return { ...nextState, lastAction: { ...payload, playerId } }
 }
 
+export const withCheckWin: IStateMapper = state => {
+  const playerIdLose = state.playerHp.findIndex(hp => hp === 0)
+  if(playerIdLose !== -1) {
+    return {...state, winner: playerIdLose}
+  }
+  return state
+}
+
 export const withCheckHit: IStateMapper = prevState => {
   if (ableToResponse(prevState)) {
     return prevState
@@ -201,7 +211,7 @@ export const withCheckHit: IStateMapper = prevState => {
 }
 
 const ableToResponse = (state: GameState): boolean => {
-  const { duel, turn, mode } = state
+  const { ignited, duel, turn, mode } = state
   const hand = state.playerDeck[turn]
   if (!duel && !!hand.find(card => card === ICard.ANGEL_GUARD)) {
     return true
@@ -213,13 +223,13 @@ const ableToResponse = (state: GameState): boolean => {
     return hand
       .filter(card => getCardColor(card) !== ICardColor.NONE)
       .filter(card => duel ? getCardType(card) !== ICardType.IGNITE : true)
-      .filter(card => !state.playedDeck.includes(card)).length > 0
+      .filter(card => !ignited && !state.stage.includes(card)).length > 0
   } else {
     if (!duel && !!hand.find(card => card === ICard.HOMO_IGNITE)) {
       return true
     }
     return hand
-      .filter(card => getCardColor(card) === getCardColor(state.playedDeck[0]))
+      .filter(card => !ignited && getCardColor(card) === getCardColor(state.stage[0]))
       .length > 0
   }
 }
@@ -227,18 +237,25 @@ const ableToResponse = (state: GameState): boolean => {
 const withHit = (state: GameState): GameState => {
   if (state.mode !== null) {
     const { turn } = state
-    const igniteCount = state.playedDeck.filter(card => getCardType(card) === ICardType.IGNITE).length
-    const basic = basicDamage(state.playedDeck.filter(card => getCardColor(card) !== ICardColor.NONE).length, state.mode)
+    const igniteCount = state.stage.filter(card => getCardType(card) === ICardType.IGNITE).length
+    const basic = basicDamage(state.stage.filter(card => getCardColor(card) !== ICardColor.NONE).length, state.mode)
     const hit = basic + igniteCount + (state.duel ? 1 : 0)
     const playerHp = [...state.playerHp]
     playerHp[turn] -= hit
-    return { ...state, playerHp, ignited: false, duel: state.duel || playerHp[turn] <= 3 }
+    return { ...state, playerHp, ignited: false, duel: state.duel || playerHp[turn] <= 3, stage: [], trashDeck: [...state.stage], mode: null }
   }
   return state
 }
 
 export const withLog: (log: string) => IStateMapper = log => prevState => {
   return { ...prevState, logs: [...prevState.logs, log] }
+}
+
+const withCheckDiscardToHp: IPlayCard = (payload, playerId) => state => {
+  if(state.playerDeck[playerId].length - payload.cards.length !== state.playerHp[playerId]) {
+    throw new Error(`should discard ${state.playerDeck[playerId].length - state.playerHp[playerId]} cards`)
+  }
+  return state
 }
 
 export const GameReducer: NetworkReducer<GameState, GameAction> = (prevState, action) => {
@@ -257,7 +274,12 @@ export const GameReducer: NetworkReducer<GameState, GameAction> = (prevState, ac
     case GameActionTypes.START:
       return withInitGame(prevState)
     case GameActionType.PLAY_CARD:
+      console.log(playerId())
       return withPlayCard(playerId(), action.payload)(JSON.parse(JSON.stringify(prevState)))
+    case GameActionType.DISCARD_CARD:
+      console.log(playerId())
+      return compose(...[withDiscardCard, withCheckDiscardToHp].map(step => step(action.payload,playerId())))(JSON.parse(JSON.stringify(prevState)))
+      // return withDiscardCard(action.payload,playerId())(JSON.parse(JSON.stringify(prevState)))
     case GameActionType.END:
       return { ...prevState, started: false }
   }

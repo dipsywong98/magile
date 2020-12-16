@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useEffect, useState } from 'react'
 import { usePoker99 } from './withGameNetwork'
-import { PlayCardPayload, GameAction, GameActionType } from './GameAction'
-import { Deck } from './components/Deck'
+import { GameAction, GameActionType, PlayCardPayload } from './GameAction'
+import { ChooseCardFor, Deck } from './components/Deck'
 import { ICard } from './types'
 // import { PlayCardAdditionalModal } from './components/PlayCardAdditionalModal'
 import { usePromise } from './usePromise'
@@ -24,11 +24,7 @@ export const Game: FunctionComponent = () => {
   const handleError = (e: Error): void => {
     setError(e.message)
   }
-  const playCard = async (payload: PlayCardPayload) => {
-    const action: GameAction = {
-      type: GameActionType.PLAY_CARD,
-      payload
-    }
+  const dispatchHelper = async (action: GameAction) => {
     if (state.turn === myPlayerId) {
       await dispatch(action).then(() => setError(''))
     } else if (myLocals.includes(state.players[state.turn])) {
@@ -36,9 +32,23 @@ export const Game: FunctionComponent = () => {
     } else {
       throw new Error('Not my turn')
     }
+  }
+  const playCard = async (payload: PlayCardPayload) => {
+    const action: GameAction = {
+      type: GameActionType.PLAY_CARD,
+      payload
+    }
+    await dispatchHelper(action)
     if (myLocals.length > 0) {
       setHideDeck(true)
     }
+  }
+  const discardCard = async (payload: PlayCardPayload) => {
+    const action: GameAction = {
+      type: GameActionType.DISCARD_CARD,
+      payload
+    }
+    await dispatchHelper(action)
   }
   useEffect(() => {
     setTimeout(() => {
@@ -61,12 +71,27 @@ export const Game: FunctionComponent = () => {
     }
     setModalCard(null)
   }
+  const chooseCardFor = (
+    throttledRenderedId !== null && throttledRenderedId !== undefined && state.turn === throttledRenderedId && state.stage.length === 0
+      ? state.playerDeck[throttledRenderedId].length <= state.playerHp[throttledRenderedId]
+      ? ChooseCardFor.FIRST_PLAY
+      : ChooseCardFor.DISCARD
+      : ChooseCardFor.RESPOND_PLAY
+  )
+  const handleCardChoose = async (payload: PlayCardPayload) => {
+    if(chooseCardFor === ChooseCardFor.DISCARD) {
+      await discardCard(payload)
+    } else {
+      await playCard(payload)
+    }
+  }
   return (
     <div style={{ pointerEvents: 'all' }}>
       {state.started && myPlayerId !== undefined &&
       <Deck
         cards={state.playerDeck[throttledRenderedId ?? myPlayerId]}
-        onCardClick={console.log as any}
+        onCardsChoose={handleCardChoose}
+        chooseCardFor={chooseCardFor}
         hide={hideDeck}
         reveal={() => setHideDeck(false)}
       />}

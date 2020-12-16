@@ -11,7 +11,7 @@ const App: FunctionComponent = withGamenetI18n({ i18ns })(withGameNetwork(() => 
   const { i18n } = useGamenetI18n()
   return (
     <GamePagesSlider gameAppState={network.gameAppState} fullPage={[false, false, true]}>
-      <Home {...network} gameName='Poker99'>
+      <Home {...network} gameName={i18n.magile}>
         <DialogContent>
           <h2>{i18n.howToPlay}</h2>
           <div>{i18n.howToPlayContent}</div>

@@ -105,7 +105,7 @@ export const GameRenderer = () => {
           transition: ['top', 'bottom', 'left', 'right'].map(s => `${s} 0.2s ease-in-out`).join(',')
         }}>
           <div style={{ transform: 'translate(-50%,-50%)', width: '142px', height: '192px' }}>
-            {state.playedDeck.map(card => <Card card={card} disabled/>)}
+            {state.stage.map(card => <Card card={card} disabled/>)}
           </div>
         </div>}
         <div style={{
