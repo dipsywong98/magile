@@ -37,6 +37,7 @@ export const Deck: FunctionComponent<{
   const [playedIndices, setPlayedIndices] = useState<number[]>([])
   const [hovering, setHovering] = useState<number | null>(null)
   const [playGetCardAnimation, setPlayGetCardAnimation] = useState(false)
+  const [discardingAnimation, setDiscardingAnimation] = useState(false)
   const [selected, dispatchSelected] = useReducer<(prev: Set<number>, action: { type: string, payload?: number }) => Set<number>>((prev, {
     type,
     payload
@@ -66,7 +67,8 @@ export const Deck: FunctionComponent<{
     }
   }
   const handlePlayCards = (param: unknown) => {
-    const mode = param === IMode.HOMO ||param === IMode.HETERO ? param : undefined
+    const mode = param === IMode.HOMO || param === IMode.HETERO ? param : undefined
+    setDiscardingAnimation(chooseCardFor === ChooseCardFor.DISCARD)
     onCardsChoose({ cards: cards.filter((_, k) => selected.has(k)), mode })
       .then(() => {
         setHovering(null)
@@ -78,6 +80,7 @@ export const Deck: FunctionComponent<{
         setTimeout(() => {
           setPlayGetCardAnimation(false)
           setPlayedIndices([])
+          setDiscardingAnimation(false)
         }, 500)
       })
       .catch(e => {
@@ -95,13 +98,14 @@ export const Deck: FunctionComponent<{
         j++
       }
     }
-    return cardsToRender
+    return (playedIndices.length > 0 && discardingAnimation) ? [...cardsToRender, ...cards.slice(cards.length - playedIndices.length)] : cardsToRender
   }
+  const playedCards = getPlayedCards()
   const withMaxWidth = (children: ReactNode, index: number, noPad = false) => (
     <div
       style={{
         padding: noPad ? 0 : '8px',
-        maxWidth: `calc(100vw / ${cards.length + 2})`,
+        maxWidth: `calc(100vw / ${playedCards.length + 2})`,
         transition: `max-width 0.1s ease-in-out`
       }}
       onMouseEnter={() => setHovering(index)}
@@ -165,7 +169,7 @@ export const Deck: FunctionComponent<{
       {
         getPlayedCards().map((card, index) => (
           card === null
-            ? <PlaceHolder key={index} maxWidth={`calc(100vw / ${cards.length + 2} + 16px)`}/>
+            ? <PlaceHolder key={index} maxWidth={`calc(100vw / ${playedCards.length + 2} + 16px)`}/>
             : withMaxWidth(<Card
               card={card}
               onClick={() => handleCardClick(card, index)}
@@ -174,8 +178,8 @@ export const Deck: FunctionComponent<{
               selected={selected.has(index)}
             />, index)))
       }
-      {playedIndices.length > 0 && chooseCardFor !== ChooseCardFor.DISCARD && <div style={{
-        maxWidth: playGetCardAnimation ? `calc((100vw / ${cards.length + 2} + 16px) * ${playedIndices.length})` : '0',
+      {playedIndices.length > 0 && !discardingAnimation && <div style={{
+        maxWidth: playGetCardAnimation ? `calc((100vw / ${playedCards.length + 2} + 16px) * ${playedIndices.length})` : '0',
         transition: 'max-width 0.3s ease-in-out',
         display: 'flex',
         flexWrap: 'nowrap'

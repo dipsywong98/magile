@@ -220,16 +220,22 @@ const ableToResponse = (state: GameState): boolean => {
     if (!duel && !!hand.find(card => card === ICard.HETERO_IGNITE)) {
       return true
     }
+    if (ignited) {
+      return hand.includes(ICard.HETERO_IGNITE)
+    }
     return hand
       .filter(card => getCardColor(card) !== ICardColor.NONE)
-      .filter(card => duel ? getCardType(card) !== ICardType.IGNITE : true)
-      .filter(card => !ignited && !state.stage.includes(card)).length > 0
+      .filter(card => duel ? getCardType(card) !== ICardType.MAGILE : true)
+      .filter(card => !state.stage.map(card => getCardColor(card)).includes(getCardColor(card))).length > 0
   } else {
     if (!duel && !!hand.find(card => card === ICard.HOMO_IGNITE)) {
       return true
     }
+    if (ignited) {
+      return hand.includes(ICard.HOMO_IGNITE)
+    }
     return hand
-      .filter(card => !ignited && getCardColor(card) === getCardColor(state.stage[0]))
+      .filter(card => getCardColor(card) === getCardColor(state.stage[0]))
       .length > 0
   }
 }
