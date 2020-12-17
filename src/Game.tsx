@@ -25,6 +25,7 @@ export const Game: FunctionComponent = () => {
     console.error('HANDLE ERROR')
     setError(e.message)
   }
+  const myTurn = state.turn === myPlayerId || myLocals.includes(state.players[state.turn])
   const dispatchHelper = async (action: GameAction) => {
     try{
       if (state.turn === myPlayerId) {
@@ -57,6 +58,12 @@ export const Game: FunctionComponent = () => {
     }
     await dispatchHelper(action)
   }
+  const takeHit = async () => {
+    const action: GameAction = {
+      type: GameActionType.TAKE_HIT,
+    }
+    await dispatchHelper(action)
+  }
   useEffect(() => {
     setTimeout(() => {
       setTrottledRenderedId(renderedDeckId)
@@ -66,17 +73,6 @@ export const Game: FunctionComponent = () => {
     await dispatch({
       type: GameActionType.END
     }).catch(handleError)
-  }
-  const [modalCard, setModalCard] = useState<null | ICard>(null)
-  const [{ resolve, reject }, makePromise] = usePromise<void>()
-
-  const handleModalClose = (payload?: PlayCardPayload) => {
-    if (payload !== undefined) {
-      playCard(payload).then(resolve).catch(handleError).catch(reject)
-    } else {
-      reject?.(new Error('the operation is cancelled'))
-    }
-    setModalCard(null)
   }
   const chooseCardFor = (
     throttledRenderedId !== null && throttledRenderedId !== undefined && state.turn === throttledRenderedId && state.stage.length === 0
@@ -101,19 +97,15 @@ export const Game: FunctionComponent = () => {
         chooseCardFor={chooseCardFor}
         hide={hideDeck}
         reveal={() => setHideDeck(false)}
+        takeHit={takeHit}
+        myTurn={myTurn}
       />}
       <div style={{ maxHeight: '50%' }}>
-        {state.winner !== undefined && state.winner !== null && <div>winner is {state.players[state.winner]}
+        {state.winner !== undefined && state.winner !== null && <div>loser is {state.players[state.winner]}
           <button onClick={again}>again</button>
         </div>}
         {state.logs.slice().reverse().map((s, k) => <div key={k}>{s}</div>)}
       </div>
-      {/*<PlayCardAdditionalModal*/}
-      {/*  open={modalCard !== null}*/}
-      {/*  card={modalCard ?? { suit: ISuit.SPADE, number: 0 }}*/}
-      {/*  onClose={handleModalClose}*/}
-      {/*  targets={targets}*/}
-      {/*/>*/}
       <Dialog open={error !== ''} onClose={() => setError('')} aria-labelledby="form-dialog-title">
         <DialogTitle>Error</DialogTitle>
         <DialogContent>

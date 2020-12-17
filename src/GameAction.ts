@@ -8,6 +8,7 @@ export enum GameActionType {
   PLAY_CARD,
   END,
   DISCARD_CARD,
+  TAKE_HIT
 }
 
 export interface PlayCardPayload {
@@ -23,6 +24,8 @@ export type GameAction = (({
   payload: PlayCardPayload
 } | {
   type: GameActionType.END
+} | {
+  type: GameActionType.TAKE_HIT
 } | {
   type: GameActionTypes
   payload: never

@@ -33,20 +33,30 @@ export type IsCard = (card: ICard) => boolean
 export type IPlayCard = (payload: PlayCardPayload, playerId: number) => IStateMapper
 
 export enum ICardType {
-  MAGE,
-  MISSILE,
-  MAGILE,
-  IGNITE,
-  ANGEL_GUARD
+  MAGE='mage',
+  MISSILE='missile',
+  MAGILE='magile',
+  IGNITE='ignite',
+  ANGEL_GUARD='angel_guard'
 }
 
 export enum ICardColor {
-  NONE,
-  EARTH,
-  WATER,
-  FIRE,
-  WIND,
-  THUNDER,
-  LIGHT,
-  DARK
+  NONE= 'none',
+  EARTH= 'earth',
+  WATER= 'water',
+  FIRE= 'fire',
+  WIND= 'wind',
+  THUNDER= 'thunder',
+  LIGHT= 'light',
+  DARK= 'dark'
 }
+
+export const allColors: ICardColor[] = [
+  ICardColor.EARTH,
+  ICardColor.WATER,
+  ICardColor.FIRE,
+  ICardColor.WIND,
+  ICardColor.THUNDER,
+  ICardColor.LIGHT,
+  ICardColor.DARK,
+]

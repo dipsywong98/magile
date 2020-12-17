@@ -99,10 +99,11 @@ export const areCardsOfColor = (cards: ICard[], color: ICardColor): boolean => {
 
 export const areCardsOfDifferentColor = (cards: ICard[]): boolean => {
   const seenColor = new Set()
-  cards.forEach((card) => {
+  const filteredCards = cards.filter((card) => getCardColor(card) !== ICardColor.NONE)
+  filteredCards.forEach((card) => {
     seenColor.add(getCardColor(card))
   })
-  return seenColor.size === cards.length
+  return seenColor.size === filteredCards.length
 }
 
 export const hasCardColorNone = (cards: ICard[]): boolean => {

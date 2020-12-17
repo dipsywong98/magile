@@ -1,12 +1,13 @@
 import { NetworkReducer } from 'smnet'
 import { GameState } from './GameState'
 import { GameAction, GameActionType, PlayCardPayload } from './GameAction'
-import { ICard, ICardColor, ICardType, IDeck, IMode, IPlayCard, IStateMapper } from './types'
+import { allColors, ICard, ICardColor, ICardType, IDeck, IMode, IPlayCard, IStateMapper } from './types'
 import { compose, GameActionTypes, shuffle } from 'gamenet'
 import { cardCount } from './constants'
 import {
   areCardsOfColor,
   areCardsOfDifferentColor,
+  areCardsOfTypeOrMagile,
   basicDamage,
   getCardColor,
   getCardType,
@@ -28,13 +29,25 @@ const withDrawCard: (playerId: number) => IStateMapper = playerId => state => {
     const hand = [...state.playerDeck[playerId], card]
     const playerDeck = [...state.playerDeck]
     playerDeck[playerId] = hand
-    console.log('cmp', hand.length, state.playerHp[playerId], playerDeck)
     if (hand.length < state.playerHp[playerId]) {
       return withDrawCard(playerId)({ ...state, playerDeck, drawDeck: state.drawDeck.slice(1) })
     } else {
       return { ...state, playerDeck, drawDeck: state.drawDeck.slice(1) }
     }
   }
+}
+
+const withEnsureHp1CardNotFunctionCard: (playerId: number) => IStateMapper = playerId => state => {
+  if (state.playerHp[playerId] === 1) {
+    const cardType = getCardType(state.playerDeck[playerId][0])
+    if (state.playerDeck[playerId].length === 1 && cardType !== ICardType.MAGE && cardType !== ICardType.MISSILE)
+      return compose(
+        withEnsureHp1CardNotFunctionCard(playerId),
+        withDrawCard(playerId),
+        withDiscardCard({ cards: state.playerDeck[playerId] }, playerId)
+      )(state)
+  }
+  return state
 }
 
 const withInitGame: IStateMapper = (prevState: GameState) => {
@@ -52,20 +65,16 @@ const withInitGame: IStateMapper = (prevState: GameState) => {
     logs: [],
     lastAction: null,
     ignited: false,
-    duel: false
+    duel: false,
+    winner: null
   }
-  console.log('1')
   const fullDeck = getFullDeck()
-  console.log('2', fullDeck)
   prevState.drawDeck = shuffle(fullDeck)
-  console.log('3', prevState.drawDeck)
   for (let id = 0; id < prevState.players.length; id++) {
     prevState.playerDeck[id] = []
     prevState.playerHp[id] = 7
-    console.log('4', id)
     prevState = withDrawCard(id)(prevState)
   }
-  console.log(prevState)
   return { ...prevState }
 }
 
@@ -95,10 +104,36 @@ const withCardNumberValidation: IPlayCard = (_, playerId) => (state) => {
   return state
 }
 
+const withCardTypeValidation: IPlayCard = ({ cards }, playerId) => state => {
+  if (cards.length === 3) {
+    if (cards.map(card => getCardColor(card)).includes(ICardColor.NONE)) {
+      throw new Error('cannot mix ignite or angel card with mage, missiles and magiles')
+    }
+    if (state.duel) {
+      if (cards.map(card => getCardType(card)).includes(ICardType.MAGILE)) {
+        throw new Error('cannot play function card during duel')
+      }
+    }
+  } else if (cards.length === 1) {
+    if (state.duel) {
+      const cardType = getCardType(cards[0])
+      if ([ICardType.MAGILE, ICardType.IGNITE, ICardType.ANGEL_GUARD].includes(cardType)) {
+        throw new Error('cannot play function card during duel')
+      }
+    }
+  } else {
+    throw new Error('you can only play 1 card or 3 cards')
+  }
+  return state
+}
+
 const withFirstPlayValidation: IPlayCard = ({ cards, mode }, playerId) => (state) => {
   if (state.stage.length === 0) {
     if (mode === null || mode === undefined) {
       throw new Error('please specify homo transfer or hetero transfer as the first to transfer')
+    }
+    if (mode === IMode.HOMO && state.playerHp[(playerId + 1) % state.players.length] === 1) {
+      throw new Error('can only do hetero transfer when next player is 1 hp')
     }
     if (cards.length !== 1) {
       throw new Error('please play one card as the first to transfer')
@@ -116,11 +151,14 @@ const withPlayHomo: IPlayCard = ({ cards }) => state => {
     if (state.stage.length === 0) {
       return { ...state }
     }
-    if ((cards.length === 1 || cards.length === 3) && areCardsOfColor(cards, getCardColor(state.stage[0]))) {
+    const cardColor = getCardColor(cards[0])
+    if (cardColor !== ICardColor.NONE) {
+      if (!areCardsOfColor(cards, getCardColor(state.stage[0]))) {
+        throw new Error(`cannot play color other than ${cardColor} in this homo transfer`)
+      }
       return { ...state }
     }
   }
-  console.log('not play homo')
   return state
 }
 
@@ -129,8 +167,19 @@ const withPlayHetero: IPlayCard = ({ cards }) => state => {
     if (state.stage.length === 0) {
       return { ...state }
     }
-    if ((cards.length === 1 || cards.length === 3) && !hasCardColorNone(cards) && areCardsOfDifferentColor([...state.stage, ...cards])) {
-      return { ...state }
+    if (!hasCardColorNone(cards)) {
+      if (!areCardsOfDifferentColor([...state.stage, ...cards])) {
+        const stageColors = state.stage.map(card => getCardColor(card))
+        throw new Error(`Color ${cards.map(card => getCardColor(card)).filter(color => stageColors.includes(color)).join(', ')} were played. You may play ${allColors.filter(color => !stageColors.includes(color)).join(',')} during this hetero transfer`)
+      } else if(!areCardsOfTypeOrMagile(cards, getCardType(state.stage[0]))) {
+        if(state.duel) {
+          throw new Error(`You may play ${getCardType(state.stage[0])} only`)
+        } else {
+          throw new Error(`You may play ${getCardType(state.stage[0])} or magile only`)
+        }
+      }else{
+        return { ...state }
+      }
     }
   }
   return state
@@ -139,11 +188,19 @@ const withPlayHetero: IPlayCard = ({ cards }) => state => {
 const withPlayIgnite: IPlayCard = ({ cards }) => state => {
   if (cards.length === 1) {
     const card = cards[0]
-    if (card === ICard.HETERO_IGNITE && state.mode === IMode.HETERO) {
-      return { ...state, ignited: true }
+    if (card === ICard.HETERO_IGNITE) {
+      if (state.mode === IMode.HETERO) {
+        return { ...state, ignited: true }
+      } else {
+        throw new Error('cannot play hetero_ignite during homo transfer')
+      }
     }
-    if (card === ICard.HOMO_IGNITE && state.mode === IMode.HOMO) {
-      return { ...state, ignited: true }
+    if (card === ICard.HOMO_IGNITE) {
+      if (state.mode === IMode.HOMO) {
+        return { ...state, ignited: true }
+      } else {
+        throw new Error('cannot play homo_ignite during hetero transfer')
+      }
     }
   }
   return state
@@ -178,6 +235,7 @@ const withPlayCard: (playerId: number, payload: PlayCardPayload) => IStateMapper
     withCheckWin,
     withCheckHit,
     withIncrementTurn,
+    withEnsureHp1CardNotFunctionCard(playerId),
     withDrawCard(playerId),
     ...[
       withPutToPlayed,
@@ -187,6 +245,7 @@ const withPlayCard: (playerId: number, payload: PlayCardPayload) => IStateMapper
       withPlayIgnite,
       withPlayHetero,
       withPlayHomo,
+      withCardTypeValidation,
       withFirstPlayValidation,
       withCardNumberValidation
     ].map(playCard => playCard(payload, playerId))
@@ -195,9 +254,9 @@ const withPlayCard: (playerId: number, payload: PlayCardPayload) => IStateMapper
 }
 
 export const withCheckWin: IStateMapper = state => {
-  const playerIdLose = state.playerHp.findIndex(hp => hp === 0)
-  if(playerIdLose !== -1) {
-    return {...state, winner: playerIdLose}
+  const playerIdLose = state.playerHp.findIndex(hp => hp <= 0)
+  if (playerIdLose !== -1) {
+    return { ...state, winner: playerIdLose }
   }
   return state
 }
@@ -226,6 +285,7 @@ const ableToResponse = (state: GameState): boolean => {
     return hand
       .filter(card => getCardColor(card) !== ICardColor.NONE)
       .filter(card => duel ? getCardType(card) !== ICardType.MAGILE : true)
+      .filter(card => areCardsOfTypeOrMagile([card], getCardType(state.stage[0])))
       .filter(card => !state.stage.map(card => getCardColor(card)).includes(getCardColor(card))).length > 0
   } else {
     if (!duel && !!hand.find(card => card === ICard.HOMO_IGNITE)) {
@@ -248,7 +308,15 @@ const withHit = (state: GameState): GameState => {
     const hit = basic + igniteCount + (state.duel ? 1 : 0)
     const playerHp = [...state.playerHp]
     playerHp[turn] -= hit
-    return { ...state, playerHp, ignited: false, duel: state.duel || playerHp[turn] <= 3, stage: [], trashDeck: [...state.stage], mode: null }
+    return {
+      ...state,
+      playerHp,
+      ignited: false,
+      duel: state.duel || playerHp[turn] <= 3,
+      stage: [],
+      trashDeck: [...state.stage],
+      mode: null
+    }
   }
   return state
 }
@@ -258,7 +326,7 @@ export const withLog: (log: string) => IStateMapper = log => prevState => {
 }
 
 const withCheckDiscardToHp: IPlayCard = (payload, playerId) => state => {
-  if(state.playerDeck[playerId].length - payload.cards.length !== state.playerHp[playerId]) {
+  if (state.playerDeck[playerId].length - payload.cards.length !== state.playerHp[playerId]) {
     throw new Error(`should discard ${state.playerDeck[playerId].length - state.playerHp[playerId]} cards`)
   }
   return state
@@ -284,10 +352,11 @@ export const GameReducer: NetworkReducer<GameState, GameAction> = (prevState, ac
       return withPlayCard(playerId(), action.payload)(JSON.parse(JSON.stringify(prevState)))
     case GameActionType.DISCARD_CARD:
       console.log(playerId())
-      return compose(...[withDiscardCard, withCheckDiscardToHp].map(step => step(action.payload,playerId())))(JSON.parse(JSON.stringify(prevState)))
-      // return withDiscardCard(action.payload,playerId())(JSON.parse(JSON.stringify(prevState)))
+      return compose(...[withDiscardCard, withCheckDiscardToHp].map(step => step(action.payload, playerId())))(JSON.parse(JSON.stringify(prevState)))
+    case GameActionType.TAKE_HIT:
+      return withCheckWin(withHit(prevState))
     case GameActionType.END:
-      return { ...prevState, started: false }
+      return { ...prevState, started: false, ready: {} }
   }
   return prevState
 }

@@ -2,7 +2,7 @@ import React, { FunctionComponent, ReactNode, useEffect, useMemo, useReducer, us
 import { ICard, IMode, IPlayCard } from '../types'
 import { Card } from './Card'
 import { Grid, IconButton } from '@material-ui/core'
-import { Delete, Place, PlayArrow, Remove, Visibility } from '@material-ui/icons'
+import { Delete, Flag, Place, PlayArrow, Remove, Visibility } from '@material-ui/icons'
 import { PlayCardPayload } from '../GameAction'
 import { Equal, NotEqual } from 'mdi-material-ui'
 
@@ -33,8 +33,8 @@ export enum ChooseCardFor {
 }
 
 export const Deck: FunctionComponent<{
-  cards: ICard[], hide: boolean, reveal: () => void, onCardsChoose: (payload: PlayCardPayload) => Promise<void>, chooseCardFor: ChooseCardFor
-}> = ({ cards, hide, reveal, onCardsChoose, chooseCardFor }) => {
+  cards: ICard[], hide: boolean, reveal: () => void, onCardsChoose: (payload: PlayCardPayload) => Promise<void>, chooseCardFor: ChooseCardFor, takeHit: () => Promise<void>, myTurn?: boolean
+}> = ({ cards, hide, reveal, onCardsChoose, chooseCardFor, takeHit, myTurn }) => {
   const [playedIndices, setPlayedIndices] = useState<number[]>([])
   const [hovering, setHovering] = useState<number | null>(null)
   const [playGetCardAnimation, setPlayGetCardAnimation] = useState(false)
@@ -69,9 +69,10 @@ export const Deck: FunctionComponent<{
   }
   const handlePlayCards = (param: unknown) => {
     const mode = param === IMode.HOMO || param === IMode.HETERO ? param : undefined
-    setDiscardingAnimation(chooseCardFor === ChooseCardFor.DISCARD)
+    const laterSetDiscardingAnimation = chooseCardFor === ChooseCardFor.DISCARD
     onCardsChoose({ cards: cards.filter((_, k) => selected.has(k)), mode })
       .then(() => {
+        setDiscardingAnimation(laterSetDiscardingAnimation)
         setHovering(null)
         setPlayedIndices(Array.from(selected))
         dispatchSelected({ type: 'clear' })
@@ -99,15 +100,14 @@ export const Deck: FunctionComponent<{
         j++
       }
     }
-    return (playedIndices.length > 0 && discardingAnimation) ? [...cardsToRender, ...cards.slice(cards.length - playedIndices.length)] : cardsToRender
+    return discardingAnimation ? [...cardsToRender, ...cards.slice(j)] : cardsToRender
   }
-  const playedCards = getPlayedCards()
   const withMaxWidth = (children: ReactNode, index: number, noPad = false) => (
     <div
       style={{
         padding: noPad ? 0 : '8px',
-        maxWidth: `calc(100vw / ${playedCards.length + 2})`,
-        transition: `max-width 0.1s ease-in-out`
+        maxWidth: `calc(100vw / ${cards.length + 2})`,
+        transition: `max-width ${DURATION/3}s ease-in-out`
       }}
       onMouseEnter={() => setHovering(index)}
       onTouchStart={() => setHovering(index)}
@@ -123,7 +123,7 @@ export const Deck: FunctionComponent<{
     right: 0,
     zIndex: 1,
     transform: hide ? 'translateY(100%)' : 'translateY(50%)',
-    transition: `transform ${DURATION}s ease-in-out`,
+    transition: `transform 0.3s ease-in-out`,
     pointerEvents: 'none'
   }}>
     <div style={{
@@ -133,15 +133,24 @@ export const Deck: FunctionComponent<{
       display: 'block',
       pointerEvents: 'all'
     }}>
+      {myTurn ? <>
       {hide && <IconButton onClick={reveal}>
         <Visibility/>
       </IconButton>}
-      {!hide && chooseCardFor === ChooseCardFor.RESPOND_PLAY && <IconButton
-        title='play'
-        onClick={handlePlayCards}
-      >
-        <PlayArrow/>
-      </IconButton>}
+      {!hide && chooseCardFor === ChooseCardFor.RESPOND_PLAY && <>
+        <IconButton
+          title='take hit'
+          onClick={() => window.confirm('Are you sure you want to take hit?') && takeHit().catch(console.error)}
+        >
+          <Flag/>
+        </IconButton>
+        <IconButton
+          title='play'
+          onClick={handlePlayCards}
+        >
+          <PlayArrow/>
+        </IconButton>
+      </>}
       {!hide && chooseCardFor === ChooseCardFor.FIRST_PLAY && <>
         <IconButton
           title='homo'
@@ -164,13 +173,13 @@ export const Deck: FunctionComponent<{
           <Delete/>
         </IconButton>
       </>}
-
+      </>: 'not your turn'}
     </div>
     <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'nowrap' }}>
       {
         getPlayedCards().map((card, index) => (
           card === null
-            ? <PlaceHolder key={index} maxWidth={`calc(100vw / ${playedCards.length + 2} + 16px)`}/>
+            ? <PlaceHolder key={index} maxWidth={`calc(100vw / ${cards.length + 2} + 16px)`}/>
             : withMaxWidth(<Card
               card={card}
               onClick={() => handleCardClick(card, index)}
@@ -180,8 +189,8 @@ export const Deck: FunctionComponent<{
             />, index)))
       }
       {playedIndices.length > 0 && !discardingAnimation && <div style={{
-        maxWidth: playGetCardAnimation ? `calc((100vw / ${playedCards.length + 2} + 16px) * ${playedIndices.length})` : '0',
-        transition: 'max-width 0.3s ease-in-out',
+        maxWidth: playGetCardAnimation ? `calc((100vw / ${cards.length + 2} + 16px) * ${playedIndices.length})` : '0',
+        transition: `max-width ${DURATION}s ease-in-out`,
         display: 'flex',
         flexWrap: 'nowrap'
       }}>
