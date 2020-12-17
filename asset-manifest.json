@@ -1,0 +1,37 @@
+{
+  "files": {
+    "main.css": "/magile/static/css/main.b9ae91f8.chunk.css",
+    "main.js": "/magile/static/js/main.54ec058d.chunk.js",
+    "main.js.map": "/magile/static/js/main.54ec058d.chunk.js.map",
+    "runtime-main.js": "/magile/static/js/runtime-main.fd7791e3.js",
+    "runtime-main.js.map": "/magile/static/js/runtime-main.fd7791e3.js.map",
+    "static/js/2.e959ede5.chunk.js": "/magile/static/js/2.e959ede5.chunk.js",
+    "static/js/2.e959ede5.chunk.js.map": "/magile/static/js/2.e959ede5.chunk.js.map",
+    "static/js/3.898bf470.chunk.js": "/magile/static/js/3.898bf470.chunk.js",
+    "static/js/3.898bf470.chunk.js.map": "/magile/static/js/3.898bf470.chunk.js.map",
+    "index.html": "/magile/index.html",
+    "static/css/main.b9ae91f8.chunk.css.map": "/magile/static/css/main.b9ae91f8.chunk.css.map",
+    "static/js/2.e959ede5.chunk.js.LICENSE.txt": "/magile/static/js/2.e959ede5.chunk.js.LICENSE.txt",
+    "static/media/angel_guard.16ea5f11.png": "/magile/static/media/angel_guard.16ea5f11.png",
+    "static/media/dark_magile.1e723600.png": "/magile/static/media/dark_magile.1e723600.png",
+    "static/media/earth_mage.e84ed39c.png": "/magile/static/media/earth_mage.e84ed39c.png",
+    "static/media/earth_missile.c93568e4.png": "/magile/static/media/earth_missile.c93568e4.png",
+    "static/media/fire_mage.0e5240db.png": "/magile/static/media/fire_mage.0e5240db.png",
+    "static/media/fire_missile.6d251f43.png": "/magile/static/media/fire_missile.6d251f43.png",
+    "static/media/hetero_ignite.4942ab4f.png": "/magile/static/media/hetero_ignite.4942ab4f.png",
+    "static/media/homo_ignite.0dedd4a2.png": "/magile/static/media/homo_ignite.0dedd4a2.png",
+    "static/media/light_magile.787bb1b9.png": "/magile/static/media/light_magile.787bb1b9.png",
+    "static/media/thunder_mage.fea8f838.png": "/magile/static/media/thunder_mage.fea8f838.png",
+    "static/media/thunder_missile.bb1203a2.png": "/magile/static/media/thunder_missile.bb1203a2.png",
+    "static/media/water_mage.c01f4c8a.png": "/magile/static/media/water_mage.c01f4c8a.png",
+    "static/media/water_missile.fb44c368.png": "/magile/static/media/water_missile.fb44c368.png",
+    "static/media/wind_mage.64b5492a.png": "/magile/static/media/wind_mage.64b5492a.png",
+    "static/media/wind_missile.c08191d4.png": "/magile/static/media/wind_missile.c08191d4.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.fd7791e3.js",
+    "static/js/2.e959ede5.chunk.js",
+    "static/css/main.b9ae91f8.chunk.css",
+    "static/js/main.54ec058d.chunk.js"
+  ]
+}
