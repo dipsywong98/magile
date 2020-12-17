@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from 'react'
 import { ICard } from '../types'
 import { makeStyles, Paper } from '@material-ui/core'
+import { cardImages } from '../assets'
 
 const useStyle = makeStyles(() => ({
   root: {
@@ -18,17 +19,33 @@ const useStyle = makeStyles(() => ({
   }
 }))
 
-export const Card: FunctionComponent<{ card: ICard, onClick?: () => void, disabled?: boolean, style?: Record<string, unknown>, selected?: boolean }> = ({ style, card, onClick, disabled, selected }) => {
+export const Card: FunctionComponent<{
+  card: ICard, onClick?: () => void, disabled?: boolean, style?: Record<string, unknown>, selected?: boolean
+}> = (
+  {
+    style,
+    card,
+    onClick,
+    disabled,
+    selected
+  }) => {
   const classes = useStyle()
 
   return (
-    <Paper elevation={4} style={{ pointerEvents: disabled ? 'none' : 'auto', ...style}} className={classes.root} onClick={!disabled ? onClick : undefined}>
-      <h2 style={{fontFamily: 'Big Shoulders Inline Text, inherit', margin: 0}}>
+    <Paper
+      elevation={4}
+      style={{
+        pointerEvents: disabled ? 'none' : 'auto',
+        backgroundImage: `url(${cardImages[card]})`,
+        backgroundSize: 'cover', ...style
+      }}
+      className={classes.root} onClick={!disabled ? onClick : undefined}>
+      <h2 style={{ fontFamily: 'Big Shoulders Inline Text, inherit', margin: 0 }}>
         {card}
       </h2>
       <div>
         {selected ? 'yes' : 'no'}
-      {/*  {hintText(card)}*/}
+        {/*  {hintText(card)}*/}
       </div>
     </Paper>
   )
