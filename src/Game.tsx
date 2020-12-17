@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from 'react'
+import React, { FunctionComponent, useEffect, useMemo, useState } from 'react'
 import { usePoker99 } from './withGameNetwork'
 import { GameAction, GameActionType, PlayCardPayload } from './GameAction'
 import { ChooseCardFor, Deck } from './components/Deck'
@@ -74,13 +74,22 @@ export const Game: FunctionComponent = () => {
       type: GameActionType.END
     }).catch(handleError)
   }
-  const chooseCardFor = (
-    throttledRenderedId !== null && throttledRenderedId !== undefined && state.turn === throttledRenderedId && state.stage.length === 0
-      ? state.playerDeck[throttledRenderedId].length <= state.playerHp[throttledRenderedId]
-      ? ChooseCardFor.FIRST_PLAY
-      : ChooseCardFor.DISCARD
-      : ChooseCardFor.RESPOND_PLAY
-  )
+  const chooseCardFor = useMemo(() => {
+    if(state.stage.length === 0) {
+      return ChooseCardFor.FIRST_PLAY
+    }
+    if(state.playerDeck[throttledRenderedId].length > state.playerHp[throttledRenderedId]) {
+      return ChooseCardFor.DISCARD
+    }
+    return ChooseCardFor.RESPOND_PLAY
+  }, [state])
+  // const chooseCardFor = (
+  //   throttledRenderedId !== null && throttledRenderedId !== undefined && state.turn === throttledRenderedId && state.stage.length === 0
+  //     ? state.playerDeck[throttledRenderedId].length <= state.playerHp[throttledRenderedId]
+  //     ? ChooseCardFor.FIRST_PLAY
+  //     : ChooseCardFor.DISCARD
+  //     : ChooseCardFor.RESPOND_PLAY
+  // )
   const handleCardChoose = async (payload: PlayCardPayload) => {
     if(chooseCardFor === ChooseCardFor.DISCARD) {
       await discardCard(payload)

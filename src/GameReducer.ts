@@ -171,13 +171,13 @@ const withPlayHetero: IPlayCard = ({ cards }) => state => {
       if (!areCardsOfDifferentColor([...state.stage, ...cards])) {
         const stageColors = state.stage.map(card => getCardColor(card))
         throw new Error(`Color ${cards.map(card => getCardColor(card)).filter(color => stageColors.includes(color)).join(', ')} were played. You may play ${allColors.filter(color => !stageColors.includes(color)).join(',')} during this hetero transfer`)
-      } else if(!areCardsOfTypeOrMagile(cards, getCardType(state.stage[0]))) {
-        if(state.duel) {
+      } else if (!areCardsOfTypeOrMagile(cards, getCardType(state.stage[0]))) {
+        if (state.duel) {
           throw new Error(`You may play ${getCardType(state.stage[0])} only`)
         } else {
           throw new Error(`You may play ${getCardType(state.stage[0])} or magile only`)
         }
-      }else{
+      } else {
         return { ...state }
       }
     }
@@ -313,8 +313,6 @@ const withHit = (state: GameState): GameState => {
       playerHp,
       ignited: false,
       duel: state.duel || playerHp[turn] <= 3,
-      stage: [],
-      trashDeck: [...state.stage],
       mode: null
     }
   }
@@ -330,6 +328,15 @@ const withCheckDiscardToHp: IPlayCard = (payload, playerId) => state => {
     throw new Error(`should discard ${state.playerDeck[playerId].length - state.playerHp[playerId]} cards`)
   }
   return state
+}
+
+const withClearStage: IStateMapper = state => {
+  return {
+    ...state,
+    stage: [],
+    trashDeck: [...state.stage],
+    lastAction: null
+  }
 }
 
 export const GameReducer: NetworkReducer<GameState, GameAction> = (prevState, action) => {
@@ -348,11 +355,9 @@ export const GameReducer: NetworkReducer<GameState, GameAction> = (prevState, ac
     case GameActionTypes.START:
       return withInitGame(prevState)
     case GameActionType.PLAY_CARD:
-      console.log(playerId())
       return withPlayCard(playerId(), action.payload)(JSON.parse(JSON.stringify(prevState)))
     case GameActionType.DISCARD_CARD:
-      console.log(playerId())
-      return compose(...[withDiscardCard, withCheckDiscardToHp].map(step => step(action.payload, playerId())))(JSON.parse(JSON.stringify(prevState)))
+      return compose(withClearStage, ...[withDiscardCard, withCheckDiscardToHp].map(step => step(action.payload, playerId())))(JSON.parse(JSON.stringify(prevState)))
     case GameActionType.TAKE_HIT:
       return withCheckWin(withHit(prevState))
     case GameActionType.END:
