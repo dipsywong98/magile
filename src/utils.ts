@@ -1,7 +1,7 @@
 import { ICard, ICardColor, ICardType, IMode } from './types'
 import { GameState } from './GameState'
 
-export const basicDamage = (count: number, mode: IMode|null): number => {
+export const basicDamage = (count: number, mode: IMode | null): number => {
   switch (mode) {
     case IMode.HOMO:
       switch (count) {
@@ -30,8 +30,8 @@ export const basicDamage = (count: number, mode: IMode|null): number => {
         default:
           return 3
       }
-      default:
-        return 0
+    default:
+      return 0
   }
 }
 
@@ -99,6 +99,10 @@ export const getCardColor = (card: ICard): ICardColor => {
   }
 }
 
+export const isActionCard = (card: ICard) => {
+  return ![ICardType.MISSILE, ICardType.MAGE].includes(getCardType(card))
+}
+
 export const areCardsOfColor = (cards: ICard[], color: ICardColor): boolean => {
   return cards.reduce<boolean>((prev, curr) => {
     return prev && getCardColor(curr) === color
@@ -116,4 +120,36 @@ export const areCardsOfDifferentColor = (cards: ICard[]): boolean => {
 
 export const hasCardColorNone = (cards: ICard[]): boolean => {
   return !!cards.find((card) => getCardColor(card) === ICardColor.NONE)
+}
+
+export const canPlayCard = (state: GameState, card: ICard): boolean => {
+  const { mode, duel, ignited } = state
+  if (duel) {
+    if ([ICardType.MAGILE, ICardType.IGNITE, ICardType.ANGEL_GUARD].includes(getCardType(card))) {
+      return false
+    }
+  }
+  if(state.stage.length === 0){
+    return !isActionCard(card)
+  }
+  if (card === ICard.ANGEL_GUARD) {
+    return true
+  }
+  if (ignited) {
+    if (![ICardType.IGNITE, ICardType.ANGEL_GUARD].includes(getCardType(card))) {
+      return false
+    }
+  }
+  if(mode === IMode.HOMO) {
+    return card === ICard.HOMO_IGNITE || getCardColor(card) === getCardColor(state.stage[0])
+  }
+  if(mode === IMode.HETERO) {
+    return card === ICard.HETERO_IGNITE || (areCardsOfTypeOrMagile([card], getCardType(state.stage[0])) && areCardsOfDifferentColor([...state.stage, card]))
+  }
+  console.warn('canPlayCard EDGECASE!!!', state, card)
+  return false
+}
+
+export const randInt = (max: number) => {
+  return Math.floor(Math.random()*max)
 }
