@@ -22,15 +22,21 @@ export const Game: FunctionComponent = () => {
   } = usePoker99()
   const [throttledRenderedId, setTrottledRenderedId] = useState(renderedDeckId)
   const handleError = (e: Error): void => {
+    console.error('HANDLE ERROR')
     setError(e.message)
   }
   const dispatchHelper = async (action: GameAction) => {
-    if (state.turn === myPlayerId) {
-      await dispatch(action).then(() => setError(''))
-    } else if (myLocals.includes(state.players[state.turn])) {
-      await dispatchAs(state.turn, action).then(() => setError(''))
-    } else {
-      throw new Error('Not my turn')
+    try{
+      if (state.turn === myPlayerId) {
+        await dispatch(action).then(() => setError(''))
+      } else if (myLocals.includes(state.players[state.turn])) {
+        await dispatchAs(state.turn, action).then(() => setError(''))
+      } else {
+        throw new Error('Not my turn')
+      }
+    } catch (e) {
+      handleError(e)
+      throw e
     }
   }
   const playCard = async (payload: PlayCardPayload) => {
@@ -38,10 +44,11 @@ export const Game: FunctionComponent = () => {
       type: GameActionType.PLAY_CARD,
       payload
     }
-    await dispatchHelper(action)
-    if (myLocals.length > 0) {
-      setHideDeck(true)
-    }
+    await dispatchHelper(action).then(() => {
+      if (myLocals.length > 0) {
+        setHideDeck(true)
+      }
+    })
   }
   const discardCard = async (payload: PlayCardPayload) => {
     const action: GameAction = {

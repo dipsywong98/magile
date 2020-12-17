@@ -8,7 +8,7 @@ import { Equal, NotEqual } from 'mdi-material-ui'
 
 const DURATION = 0.3
 
-const PlaceHolder: FunctionComponent<{ maxWidth: string }> = ({ maxWidth }) => {
+const PlaceHolder: FunctionComponent<{ maxWidth: string, style?: Record<string, unknown> }> = ({ maxWidth, style }) => {
   const [width, setWidth] = useState(maxWidth)
   useEffect(() => {
     setTimeout(() => {
@@ -20,7 +20,8 @@ const PlaceHolder: FunctionComponent<{ maxWidth: string }> = ({ maxWidth }) => {
       maxWidth: width,
       minWidth: width,
       transition: `min-width ${DURATION}s ease-in-out`,
-      position: 'relative'
+      position: 'relative',
+      ...style
     }}/>
   )
 }
