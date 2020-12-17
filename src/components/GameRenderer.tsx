@@ -4,7 +4,8 @@ import { PlayCardPayload, GameActionType } from '../GameAction'
 import { Card } from './Card'
 import { Autorenew, Bomb } from 'mdi-material-ui'
 import { Loop } from '@material-ui/icons'
-import { IDeck } from '../types'
+import { IDeck, IMode } from '../types'
+import { computeDamage } from '../utils'
 
 const Name: FunctionComponent = (props) => (
   <div {...props}/>
@@ -36,25 +37,65 @@ export const GameRenderer = () => {
       type: GameActionType.END
     }).catch(console.error)
   }
+  const status = (() => {
+    if (state.started) {
+      if (state.playerDeck[state.turn].length > state.playerHp[state.turn]) {
+        return `${state.players[state.turn]} discard card til ${state.playerHp[state.turn]}`
+      }
+      if (state.stage.length === 0) {
+        return `${state.players[state.turn]} initializing transfer`
+      } else {
+        return `${state.players[state.turn]} responding to ${state.mode === IMode.HOMO ? 'homo' : 'hetero'} transfer. Current damage: ${computeDamage(state)}`
+      }
+    }
+    return undefined
+  })()
+  const hint = (() => {
+    if(state.started) {
+      if(state.duel) {
+        return 'DUEL! NO Function card and each hit will deduct 1 more hp!'
+      }
+      if(state.ignited) {
+        return 'IGNITED! Respond only with same ignited or angel guard!'
+      }
+    }
+    return undefined
+  })()
   return (
     !state.started
       ? <div
         style={{ backgroundColor: 'green', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, color: 'white' }}
       />
       : <div
-        style={{ backgroundColor: 'green', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, color: 'white' }}>
+        style={{
+          backgroundColor: 'green',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          color: 'white',
+          boxShadow: state.duel ? 'inset 0 0 100px #ff9d9d' : undefined,
+          transition: 'box-shadow 0.3s ease-in-out'
+        }}>
+      <div style={{display: 'flex', justifyContent: 'space-around', margin: 'auto'}}>
         {
           new Array(state.players.length).fill(0).map((_, k) => mp(k + (myPlayerId ?? 0))).filter(id => id !== (myPlayerId ?? 0)).map(id => (
-            <div>
-              {id}
+            <div style={{border: `solid ${state.turn === id ? 'red' : 'transparent'} 2px`, padding: '16px 32px'}}>
+              {state.players[id]} : {state.playerHp[id]}
             </div>
           ))
         }
+      </div>
         {/*{myPlayerId === undefined && <Name offset={0}/>}*/}
         {prevCardPayload !== null &&
         <div style={{ position: 'absolute', ...center }}>
-          <div style={{ transform: 'translate(-50%,-50%)', display: 'flex' }}>
-            {prevCardPayload.map(card => <div style={{ padding: '8px' }}><Card card={card} disabled/></div>)}
+          <div style={{ transform: 'translate(-50%,-50%)', textAlign: 'center' }}>
+            {hint && <h3>{hint}</h3>}
+            <h1>{status}</h1>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              {prevCardPayload.map(card => <div style={{ padding: '8px' }}><Card card={card} disabled/></div>)}
+            </div>
           </div>
         </div>}
         {showAnimateCard && state.lastAction !== null && <div style={{
@@ -78,9 +119,6 @@ export const GameRenderer = () => {
           {state.winner !== undefined && state.winner !== null && <div>loser is {state.players[state.winner]}
             <button onClick={again}>again</button>
           </div>}
-          <div>
-            Direction: {state.direction === 1 ? <Autorenew fontSize='large'/> : <Loop fontSize='large'/>}
-          </div>
         </div>
         <h3 style={{ position: 'absolute', bottom: 0, right: '20px' }}>Draw Deck: {state.drawDeck.length}</h3>
       </div>

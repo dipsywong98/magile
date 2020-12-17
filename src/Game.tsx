@@ -74,22 +74,13 @@ export const Game: FunctionComponent = () => {
       type: GameActionType.END
     }).catch(handleError)
   }
-  const chooseCardFor = useMemo(() => {
-    if(state.stage.length === 0) {
-      return ChooseCardFor.FIRST_PLAY
-    }
-    if(state.playerDeck[throttledRenderedId].length > state.playerHp[throttledRenderedId]) {
-      return ChooseCardFor.DISCARD
-    }
-    return ChooseCardFor.RESPOND_PLAY
-  }, [state])
-  // const chooseCardFor = (
-  //   throttledRenderedId !== null && throttledRenderedId !== undefined && state.turn === throttledRenderedId && state.stage.length === 0
-  //     ? state.playerDeck[throttledRenderedId].length <= state.playerHp[throttledRenderedId]
-  //     ? ChooseCardFor.FIRST_PLAY
-  //     : ChooseCardFor.DISCARD
-  //     : ChooseCardFor.RESPOND_PLAY
-  // )
+  let chooseCardFor = ChooseCardFor.RESPOND_PLAY
+  if(state.stage.length === 0) {
+    chooseCardFor = ChooseCardFor.FIRST_PLAY
+  }
+  if(throttledRenderedId !== undefined && throttledRenderedId !== null && state.playerDeck[throttledRenderedId].length > state.playerHp[throttledRenderedId]) {
+    chooseCardFor = ChooseCardFor.DISCARD
+  }
   const handleCardChoose = async (payload: PlayCardPayload) => {
     if(chooseCardFor === ChooseCardFor.DISCARD) {
       await discardCard(payload)
@@ -98,7 +89,7 @@ export const Game: FunctionComponent = () => {
     }
   }
   return (
-    <div style={{ pointerEvents: 'all' }}>
+    <div style={{ pointerEvents: 'all', color: 'white' }}>
       {state.started && myPlayerId !== undefined &&
       <Deck
         cards={state.playerDeck[throttledRenderedId ?? myPlayerId]}

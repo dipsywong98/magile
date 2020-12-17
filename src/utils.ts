@@ -1,6 +1,7 @@
 import { ICard, ICardColor, ICardType, IMode } from './types'
+import { GameState } from './GameState'
 
-export const basicDamage = (count: number, mode: IMode): number => {
+export const basicDamage = (count: number, mode: IMode|null): number => {
   switch (mode) {
     case IMode.HOMO:
       switch (count) {
@@ -29,8 +30,15 @@ export const basicDamage = (count: number, mode: IMode): number => {
         default:
           return 3
       }
-
+      default:
+        return 0
   }
+}
+
+export const computeDamage = (state: GameState) => {
+  const igniteCount = state.stage.filter(card => getCardType(card) === ICardType.IGNITE).length
+  const basic = basicDamage(state.stage.filter(card => getCardColor(card) !== ICardColor.NONE).length, state.mode)
+  return basic + igniteCount + (state.duel ? 1 : 0)
 }
 
 export const getCardType = (card: ICard): ICardType => {
