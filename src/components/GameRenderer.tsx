@@ -1,11 +1,10 @@
-import React, { FunctionComponent, useCallback, useEffect, useState } from 'react'
+import React, { FunctionComponent, useEffect, useState } from 'react'
 import { usePoker99 } from '../withGameNetwork'
-import { PlayCardPayload, GameActionType } from '../GameAction'
+import { GameActionType } from '../GameAction'
 import { Card } from './Card'
-import { Autorenew, Bomb } from 'mdi-material-ui'
-import { Loop } from '@material-ui/icons'
 import { IDeck, IMode } from '../types'
 import { computeDamage } from '../utils'
+import { Button } from '@material-ui/core'
 
 const Name: FunctionComponent = (props) => (
   <div {...props}/>
@@ -39,6 +38,9 @@ export const GameRenderer = () => {
   }
   const status = (() => {
     if (state.started) {
+      if(state.winner !== null) {
+        return `Loser is ${state.players[state.winner]}`
+      }
       if (state.playerDeck[state.turn].length > state.playerHp[state.turn]) {
         return `${state.players[state.turn]} discard card til ${state.playerHp[state.turn]}`
       }
@@ -52,6 +54,9 @@ export const GameRenderer = () => {
   })()
   const hint = (() => {
     if(state.started) {
+      if(state.winner !== null) {
+        return `Game Over`
+      }
       if(state.duel) {
         return 'DUEL! NO Function card and each hit will deduct 1 more hp!'
       }
@@ -93,6 +98,9 @@ export const GameRenderer = () => {
           <div style={{ transform: 'translate(-50%,-50%)', textAlign: 'center' }}>
             {hint && <h3>{hint}</h3>}
             <h1>{status}</h1>
+            {state.winner !== undefined && state.winner !== null && <div>
+              <Button variant="contained" color='primary' onClick={again}>again</Button>
+            </div>}
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               {prevCardPayload.map(card => <div style={{ padding: '8px' }}><Card card={card} disabled/></div>)}
             </div>
@@ -109,17 +117,6 @@ export const GameRenderer = () => {
             {state.lastAction.cards.map(card => <div style={{ padding: '8px' }}><Card card={card} disabled/></div>)}
           </div>
         </div>}
-        <div style={{
-          position: 'absolute',
-          left: '50%',
-          bottom: 'calc(50% - 192px - 4em)',
-          transform: 'translateX(-50%)',
-          textAlign: 'center'
-        }}>
-          {state.winner !== undefined && state.winner !== null && <div>loser is {state.players[state.winner]}
-            <button onClick={again}>again</button>
-          </div>}
-        </div>
         <h3 style={{ position: 'absolute', bottom: 0, right: '20px' }}>Draw Deck: {state.drawDeck.length}</h3>
       </div>
   )

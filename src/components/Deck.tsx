@@ -1,8 +1,8 @@
-import React, { FunctionComponent, ReactNode, useEffect, useMemo, useReducer, useState } from 'react'
-import { ICard, IMode, IPlayCard } from '../types'
+import React, { FunctionComponent, ReactNode, useEffect, useReducer, useState } from 'react'
+import { ICard, IMode } from '../types'
 import { Card } from './Card'
-import { Grid, IconButton } from '@material-ui/core'
-import { Delete, Flag, Place, PlayArrow, Remove, Visibility } from '@material-ui/icons'
+import { Button } from '@material-ui/core'
+import { Delete, Flag, PlayArrow, Visibility } from '@material-ui/icons'
 import { PlayCardPayload } from '../GameAction'
 import { Equal, NotEqual } from 'mdi-material-ui'
 
@@ -128,50 +128,55 @@ export const Deck: FunctionComponent<{
   }}>
     <div style={{
       textAlign: 'center',
-      transform: 'translateY(-100%)',
+      transform: 'translateY(-80px)',
       margin: 'auto',
       display: 'block',
       pointerEvents: 'all'
     }}>
       {myTurn ? <>
-      {hide && <IconButton onClick={reveal}>
+      {hide && <Button variant='contained' onClick={reveal}>
         <Visibility/>
-      </IconButton>}
+      </Button>}
       {!hide && chooseCardFor === ChooseCardFor.RESPOND_PLAY && <>
-        <IconButton
+        <Button variant='contained'
           title='take hit'
+          color='secondary'
           onClick={() => window.confirm('Are you sure you want to take hit?') && takeHit().catch(console.error)}
         >
           <Flag/>
-        </IconButton>
-        <IconButton
+        </Button>
+        <Button style={{marginLeft: '8px'}} variant='contained'
           title='play'
+          color='primary'
           onClick={handlePlayCards}
         >
           <PlayArrow/>
-        </IconButton>
+        </Button>
       </>}
       {!hide && chooseCardFor === ChooseCardFor.FIRST_PLAY && <>
-        <IconButton
+        <Button variant='contained'
           title='homo'
+          color='primary'
           onClick={() => handlePlayCards(IMode.HOMO)}
         >
           <Equal/>
-        </IconButton>
-        <IconButton
+        </Button>
+        <Button style={{marginLeft: '8px'}} variant='contained'
           title='hetero'
+          color='primary'
           onClick={() => handlePlayCards(IMode.HETERO)}
         >
           <NotEqual/>
-        </IconButton>
+        </Button>
       </>}
       {!hide && chooseCardFor === ChooseCardFor.DISCARD && <>
-        <IconButton
+        <Button variant='contained'
+          color='secondary'
           title='trash'
           onClick={handlePlayCards}
         >
           <Delete/>
-        </IconButton>
+        </Button>
       </>}
       </>: 'not your turn'}
     </div>
@@ -184,8 +189,9 @@ export const Deck: FunctionComponent<{
               card={card}
               onClick={() => handleCardClick(card, index)}
               disabled={hide}
-              style={{ transform: (hovering === index || selected.has(index)) ? 'translateY(-20%)' : undefined }}
+              style={{ transform: (hovering === index || selected.has(index)) ? 'translateY(-30%)' : 'translateY(-15%)' }}
               selected={selected.has(index)}
+              isDelete={chooseCardFor === ChooseCardFor.DISCARD}
             />, index)))
       }
       {playedIndices.length > 0 && !discardingAnimation && <div style={{

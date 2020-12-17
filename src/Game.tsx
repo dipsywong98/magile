@@ -1,10 +1,8 @@
-import React, { FunctionComponent, useEffect, useMemo, useState } from 'react'
+import React, { FunctionComponent, useEffect, useState } from 'react'
 import { usePoker99 } from './withGameNetwork'
 import { GameAction, GameActionType, PlayCardPayload } from './GameAction'
 import { ChooseCardFor, Deck } from './components/Deck'
-import { ICard } from './types'
 // import { PlayCardAdditionalModal } from './components/PlayCardAdditionalModal'
-import { usePromise } from './usePromise'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core'
 
 export const Game: FunctionComponent = () => {
@@ -101,9 +99,6 @@ export const Game: FunctionComponent = () => {
         myTurn={myTurn}
       />}
       <div style={{ maxHeight: '50%' }}>
-        {state.winner !== undefined && state.winner !== null && <div>loser is {state.players[state.winner]}
-          <button onClick={again}>again</button>
-        </div>}
         {state.logs.slice().reverse().map((s, k) => <div key={k}>{s}</div>)}
       </div>
       <Dialog open={error !== ''} onClose={() => setError('')} aria-labelledby="form-dialog-title">

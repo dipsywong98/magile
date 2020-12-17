@@ -2,6 +2,9 @@ import React, { FunctionComponent } from 'react'
 import { ICard } from '../types'
 import { makeStyles, Paper } from '@material-ui/core'
 import { cardImages } from '../assets'
+import { CheckCircleOutline } from 'mdi-material-ui'
+import { green, red } from '@material-ui/core/colors'
+import { CancelOutlined } from '@material-ui/icons'
 
 const useStyle = makeStyles(() => ({
   root: {
@@ -20,14 +23,15 @@ const useStyle = makeStyles(() => ({
 }))
 
 export const Card: FunctionComponent<{
-  card: ICard, onClick?: () => void, disabled?: boolean, style?: Record<string, unknown>, selected?: boolean
+  card: ICard, onClick?: () => void, disabled?: boolean, style?: Record<string, unknown>, selected?: boolean, isDelete?: boolean
 }> = (
   {
     style,
     card,
     onClick,
     disabled,
-    selected
+    selected,
+    isDelete
   }) => {
   const classes = useStyle()
 
@@ -37,16 +41,21 @@ export const Card: FunctionComponent<{
       style={{
         pointerEvents: disabled ? 'none' : 'auto',
         backgroundImage: `url(${cardImages[card]})`,
-        backgroundSize: 'cover', ...style
+        backgroundSize: 'cover',
+        position: 'relative',
+        ...style
       }}
       className={classes.root} onClick={!disabled ? onClick : undefined}>
-      <h2 style={{ fontFamily: 'Big Shoulders Inline Text, inherit', margin: 0 }}>
+      <h2 style={{ fontFamily: 'Big Shoulders Inline Text, inherit', margin: 0, color: 'white', textShadow: '5px 3px 8px black' }}>
         {card}
       </h2>
-      <div>
-        {selected ? 'yes' : 'no'}
-        {/*  {hintText(card)}*/}
-      </div>
+      {selected && <div style={{position: 'absolute', top: 0, right: 0}}>
+        {isDelete ? <CancelOutlined style={{ color: red[500] }} fontSize='large'/> : <CheckCircleOutline style={{ color: green[500] }} fontSize='large'/>}
+      </div>}
+      {/*<div>*/}
+      {/*  {selected ? 'yes' : 'no'}*/}
+      {/*  /!*  {hintText(card)}*!/*/}
+      {/*</div>*/}
     </Paper>
   )
 }
