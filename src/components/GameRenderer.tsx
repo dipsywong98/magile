@@ -6,10 +6,7 @@ import { IDeck, IMode } from '../types'
 import { computeDamage } from '../utils'
 import { Button } from '@material-ui/core'
 import { i18nSub, useGamenetI18n } from 'gamenet-material'
-
-const Name: FunctionComponent = (props) => (
-  <div {...props}/>
-)
+import { DamageTableToggleButton } from '../DamageTableToggleButton'
 
 export const GameRenderer = () => {
   const { state, myPlayerId, dispatch } = usePoker99()
@@ -93,7 +90,12 @@ export const GameRenderer = () => {
         {
           new Array(state.players.length).fill(0).map((_, k) => mp(k + (myPlayerId ?? 0))).filter(id => id !== (myPlayerId ?? 0)).map(id => (
             <div style={{border: `solid ${state.turn === id ? 'red' : 'transparent'} 2px`, padding: '16px 32px'}}>
-              {state.players[id]} : {state.playerHp[id]}
+              <div>
+                {state.players[id]}
+              </div>
+              <div>
+                hp: {state.playerHp[id]}
+              </div>
             </div>
           ))
         }
@@ -125,6 +127,7 @@ export const GameRenderer = () => {
           </div>
         </div>}
         <h3 style={{ position: 'absolute', bottom: 0, right: '20px' }}>{i18n.drawDeck}: {state.drawDeck.length}</h3>
+        <DamageTableToggleButton/>
       </div>
   )
 }

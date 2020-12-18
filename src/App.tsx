@@ -5,6 +5,7 @@ import { Game } from './Game'
 import { GameRenderer } from './components/GameRenderer'
 import { i18ns } from './i18ns'
 import { DialogContent } from '@material-ui/core'
+import { DamageTable } from './DamageTable'
 
 const App: FunctionComponent = withGamenetI18n({ i18ns })(withGameNetwork(() => {
   const network = usePoker99()
@@ -13,8 +14,7 @@ const App: FunctionComponent = withGamenetI18n({ i18ns })(withGameNetwork(() => 
     <GamePagesSlider gameAppState={network.gameAppState} fullPage={[false, false, true]} GameRenderer={<GameRenderer/>}>
       <Home {...network} gameName={i18n.gameName}>
         <DialogContent>
-          <h2>{i18n.howToPlay}</h2>
-          <div>{i18n.howToPlayContent}</div>
+          {i18n.howToPlayContent}
         </DialogContent>
       </Home>
       <Room {...network} />

@@ -1,16 +1,13 @@
 import { gamenetI18n } from 'gamenet-material'
 import React from 'react'
 import { ICard, ICardColor, ICardType, IMode } from '../types'
+import { howToPlay } from './howToPlay.en'
 
 export const en = {
   ...gamenetI18n.en,
   gameName: 'Magile',
   howToPlay: 'How To Play',
-  howToPlayContent: (
-    <div>
-      TBA
-    </div>
-  ),
+  howToPlayContent: howToPlay,
   [IMode.HOMO]: 'Homo',
   [IMode.HETERO]: 'Hetero',
   [ICardType.MAGE]: 'Mage',
@@ -75,5 +72,11 @@ export const en = {
   cannotPlayHomoIgniteDuringHeteroTransfer: 'Cannot Play Homo Ignite during Hetero transfer',
   cannotPlayHeteroIgniteDuringHomoTransfer: 'Cannot Play Hetero Ignite during Homo transfer',
   invalidMove: 'invalidMove',
-  shouldDiscard$countCards: 'should discard {{count}} cards'
+  shouldDiscard$countCards: 'should discard {{count}} cards',
+  mode: 'mode',
+  count: 'count',
+  damage: 'damage',
+  damageTableHint: 'After playing first ignite in the transfer, each additional ignite damage+1; during duel damage+1.',
+  damageTable: 'Damage Table',
+  close: 'close'
 }

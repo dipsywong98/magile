@@ -45,6 +45,7 @@ export const Card: FunctionComponent<{
         backgroundImage: `url(${cardImages[card]})`,
         backgroundSize: 'cover',
         position: 'relative',
+        textAlign: 'left',
         ...style
       }}
       className={classes.root} onClick={!disabled ? onClick : undefined}>

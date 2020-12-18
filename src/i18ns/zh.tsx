@@ -1,16 +1,13 @@
 import { gamenetI18n } from 'gamenet-material'
 import React from 'react'
 import { ICard, ICardColor, ICardType, IMode } from '../types'
+import { howToPlay } from './howToPlay.zh'
 
 export const zh = {
   ...gamenetI18n.zh,
   gameName: '魔法飛彈大作戰',
   howToPlay: '玩法',
-  howToPlayContent: (
-    <div>
-      還沒有哦
-    </div>
-  ),
+  howToPlayContent: howToPlay,
   [IMode.HOMO]: '同系',
   [IMode.HETERO]: '異系',
   [ICardType.MAGE]: '魔彈',
@@ -75,5 +72,11 @@ export const zh = {
   cannotPlayHomoIgniteDuringHeteroTransfer: '異系傳遞不能打出同系引爆',
   cannotPlayHeteroIgniteDuringHomoTransfer: '同系傳遞不能打出異系引爆',
   invalidMove: '不允許的行動',
-  shouldDiscard$countCards: '請棄{{count}}張卡'
+  shouldDiscard$countCards: '請棄{{count}}張卡',
+  mode: '傳遞模式',
+  count: '數量',
+  damage: '傷害',
+  damageTableHint: '打出一張引爆卡後，其後每張引爆傷害+1。大決戰其間傷害+1',
+  damageTable: '傷害表',
+  close: '關閉'
 }

@@ -8,7 +8,7 @@ import {
   areCardsOfColor,
   areCardsOfDifferentColor,
   areCardsOfTypeOrMagile,
-  basicDamage, buildError,
+  basicDamage, buildError, computeDamage,
   getCardColor,
   getCardType,
   hasCardColorNone
@@ -316,9 +316,7 @@ const ableToResponse = (state: GameState): boolean => {
 const withHit = (state: GameState): GameState => {
   if (state.mode !== null) {
     const { turn } = state
-    const igniteCount = state.stage.filter(card => getCardType(card) === ICardType.IGNITE).length
-    const basic = basicDamage(state.stage.filter(card => getCardColor(card) !== ICardColor.NONE).length, state.mode)
-    const hit = basic + igniteCount + (state.duel ? 1 : 0)
+    const hit = computeDamage(state)
     const playerHp = [...state.playerHp]
     playerHp[turn] -= hit
     return {

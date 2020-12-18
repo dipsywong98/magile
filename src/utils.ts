@@ -39,7 +39,7 @@ export const basicDamage = (count: number, mode: IMode | null): number => {
 export const computeDamage = (state: GameState) => {
   const igniteCount = state.stage.filter(card => getCardType(card) === ICardType.IGNITE).length
   const basic = basicDamage(state.stage.filter(card => getCardColor(card) !== ICardColor.NONE).length, state.mode)
-  return basic + igniteCount + (state.duel ? 1 : 0)
+  return basic + Math.max(igniteCount - 1, 0) + (state.duel ? 1 : 0)
 }
 
 export const getCardType = (card: ICard): ICardType => {
@@ -130,7 +130,7 @@ export const canPlayCard = (state: GameState, card: ICard): boolean => {
       return false
     }
   }
-  if(state.stage.length === 0){
+  if (state.stage.length === 0) {
     return !isActionCard(card)
   }
   if (card === ICard.ANGEL_GUARD) {
@@ -141,10 +141,10 @@ export const canPlayCard = (state: GameState, card: ICard): boolean => {
       return false
     }
   }
-  if(mode === IMode.HOMO) {
+  if (mode === IMode.HOMO) {
     return card === ICard.HOMO_IGNITE || getCardColor(card) === getCardColor(state.stage[0])
   }
-  if(mode === IMode.HETERO) {
+  if (mode === IMode.HETERO) {
     return card === ICard.HETERO_IGNITE || (areCardsOfTypeOrMagile([card], getCardType(state.stage[0])) && areCardsOfDifferentColor([...state.stage, card]))
   }
   console.warn('canPlayCard EDGECASE!!!', state, card)
@@ -152,17 +152,17 @@ export const canPlayCard = (state: GameState, card: ICard): boolean => {
 }
 
 export const randInt = (max: number) => {
-  return Math.floor(Math.random()*max)
+  return Math.floor(Math.random() * max)
 }
 
 export const buildError = (messageKey: string, values?: Record<string, string>, variables?: Record<string, string | string[]>): Error => {
-  return new Error(JSON.stringify({messageKey, values: values ?? {}, variables}))
+  return new Error(JSON.stringify({ messageKey, values: values ?? {}, variables }))
 }
 
 export const decodeError = (error: Error, i18n: Record<string, unknown>): string => {
-  const {messageKey, values, variables} = JSON.parse(error.message)
-  Object.entries((variables??{}) as Record<string, string | string[]>).forEach(([varName, i18nKey]) => {
-    if(typeof i18nKey ==='string') {
+  const { messageKey, values, variables } = JSON.parse(error.message)
+  Object.entries((variables ?? {}) as Record<string, string | string[]>).forEach(([varName, i18nKey]) => {
+    if (typeof i18nKey === 'string') {
       values[varName] = i18n[i18nKey]
     } else {
       values[varName] = i18nKey.map(key => i18n[key]).join(', ')
