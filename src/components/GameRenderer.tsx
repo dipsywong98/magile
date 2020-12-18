@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from 'react'
+import React, { FunctionComponent, useEffect, useMemo, useState } from 'react'
 import { usePoker99 } from '../withGameNetwork'
 import { GameActionType } from '../GameAction'
 import { Card } from './Card'
@@ -52,12 +52,12 @@ export const GameRenderer = () => {
         return i18nSub(i18n.$playerInitializingTransfer, {player})
       } else {
         const mode = i18n[state.mode ?? IMode.HOMO]
-        const damage = `${computeDamage(state)}`
-        return i18nSub(i18n.$playerRespondTo$modeTransferCurrent$damage, {player, mode, damage})
+        return i18nSub(i18n.$playerRespondTo$modeTransfer, {player, mode})
       }
     }
     return undefined
   })()
+  const damage = useMemo(() => `${computeDamage(state)}`, [state])
   const hint = (() => {
     if(state.started) {
       if(state.winner !== null) {
@@ -107,6 +107,7 @@ export const GameRenderer = () => {
             {state.winner !== undefined && state.winner !== null && <div>
               <Button variant="contained" color='primary' onClick={again}>{i18n.again}</Button>
             </div>}
+            <h3>{i18nSub(i18n.current$damage, {damage})}</h3>
             <div style={{ display: 'flex', justifyContent: 'center', maxWidth: 'calc(100vw - 32px)', flexWrap: 'wrap', marginRight: 'auto', marginLeft: 'auto', marginBottom: '70px' }}>
               {prevCardPayload.map(card => <div style={{ padding: '8px', maxHeight: '70px' }}><Card card={card} disabled/></div>)}
             </div>

@@ -1,5 +1,6 @@
 import { ICard, ICardColor, ICardType, IMode } from './types'
 import { GameState } from './GameState'
+import { i18nSub } from 'gamenet-material'
 
 export const basicDamage = (count: number, mode: IMode | null): number => {
   switch (mode) {
@@ -153,3 +154,20 @@ export const canPlayCard = (state: GameState, card: ICard): boolean => {
 export const randInt = (max: number) => {
   return Math.floor(Math.random()*max)
 }
+
+export const buildError = (messageKey: string, values?: Record<string, string>, variables?: Record<string, string | string[]>): Error => {
+  return new Error(JSON.stringify({messageKey, values: values ?? {}, variables}))
+}
+
+export const decodeError = (error: Error, i18n: Record<string, unknown>): string => {
+  const {messageKey, values, variables} = JSON.parse(error.message)
+  Object.entries((variables??{}) as Record<string, string | string[]>).forEach(([varName, i18nKey]) => {
+    if(typeof i18nKey ==='string') {
+      values[varName] = i18n[i18nKey]
+    } else {
+      values[varName] = i18nKey.map(key => i18n[key]).join(', ')
+    }
+  })
+  return i18nSub(i18n[messageKey] as string, { ...values })
+}
+

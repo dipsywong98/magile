@@ -4,6 +4,8 @@ import { GameAction, GameActionType, PlayCardPayload } from './GameAction'
 import { ChooseCardFor, Deck } from './components/Deck'
 // import { PlayCardAdditionalModal } from './components/PlayCardAdditionalModal'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core'
+import { decodeError } from './utils'
+import { useGamenetI18n } from 'gamenet-material'
 
 export const Game: FunctionComponent = () => {
   const {
@@ -19,9 +21,14 @@ export const Game: FunctionComponent = () => {
     renderedDeckId
   } = usePoker99()
   const [throttledRenderedId, setTrottledRenderedId] = useState(renderedDeckId)
+  const {i18n} = useGamenetI18n()
   const handleError = (e: Error): void => {
     console.error('HANDLE ERROR')
-    setError(e.message)
+    try {
+      setError(decodeError(e, i18n))
+    } catch {
+      setError(e.message)
+    }
   }
   const myTurn = state.turn === myPlayerId || myLocals.includes(state.players[state.turn])
   const dispatchHelper = async (action: GameAction) => {

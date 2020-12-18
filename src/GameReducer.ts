@@ -8,7 +8,7 @@ import {
   areCardsOfColor,
   areCardsOfDifferentColor,
   areCardsOfTypeOrMagile,
-  basicDamage,
+  basicDamage, buildError,
   getCardColor,
   getCardType,
   hasCardColorNone
@@ -20,7 +20,10 @@ const getFullDeck = (): IDeck => {
 
 const withDrawCard: (playerId: number) => IStateMapper = playerId => state => {
   if (state.playerDeck[playerId].length >= state.playerHp[playerId]) {
-    throw new Error(`cannot draw, ${state.players[playerId]} already has ${state.playerHp[playerId]} cards`)
+    throw buildError('cannotDraw$playerAlreadyHas$countCards', {
+      player: state.players[playerId],
+      count: `${state.playerHp[playerId]}`
+    })
   }
   const card = state.drawDeck[0]
   if (card === undefined) {
@@ -84,7 +87,7 @@ const withDiscardCard: IPlayCard = ({ cards }, playerId) => state => {
   cards.forEach((card) => {
     const index = hand.indexOf(card)
     if (index === -1) {
-      throw new Error(`${state.players[playerId]} doesnt own card ${card}`)
+      throw buildError('$playerDoesNotOwnCard$card', { player: state.players[playerId] }, { card })
     }
     hand.splice(index, 1)
   })
@@ -99,7 +102,7 @@ const withPutToPlayed: IPlayCard = ({ cards }) => (state) => {
 
 const withCardNumberValidation: IPlayCard = (_, playerId) => (state) => {
   if (state.playerDeck[playerId].length > state.playerHp[playerId]) {
-    throw new Error(`Player deck amount is greater than his hp, please discard`)
+    throw buildError('playerCardMoreThanHp')
   }
   return state
 }
@@ -107,22 +110,22 @@ const withCardNumberValidation: IPlayCard = (_, playerId) => (state) => {
 const withCardTypeValidation: IPlayCard = ({ cards }, playerId) => state => {
   if (cards.length === 3) {
     if (cards.map(card => getCardColor(card)).includes(ICardColor.NONE)) {
-      throw new Error('cannot mix ignite or angel card with mage, missiles and magiles')
+      throw buildError('cannotMixIgniteAngelWithMagiles')
     }
     if (state.duel) {
       if (cards.map(card => getCardType(card)).includes(ICardType.MAGILE)) {
-        throw new Error('cannot play function card during duel')
+        throw buildError('cannotPlayFunctionDuringDuel')
       }
     }
   } else if (cards.length === 1) {
     if (state.duel) {
       const cardType = getCardType(cards[0])
       if ([ICardType.MAGILE, ICardType.IGNITE, ICardType.ANGEL_GUARD].includes(cardType)) {
-        throw new Error('cannot play function card during duel')
+        throw buildError('cannotPlayFunctionDuringDuel')
       }
     }
   } else {
-    throw new Error('you can only play 1 card or 3 cards')
+    throw buildError('canPlayOnly1Or3Cards')
   }
   return state
 }
@@ -130,16 +133,16 @@ const withCardTypeValidation: IPlayCard = ({ cards }, playerId) => state => {
 const withFirstPlayValidation: IPlayCard = ({ cards, mode }, playerId) => (state) => {
   if (state.stage.length === 0) {
     if (mode === null || mode === undefined) {
-      throw new Error('please specify homo transfer or hetero transfer as the first to transfer')
+      throw buildError('specifyHomoOrHeteroAtFirstTransfer')
     }
     if (mode === IMode.HOMO && state.playerHp[(playerId + 1) % state.players.length] === 1) {
-      throw new Error('can only do hetero transfer when next player is 1 hp')
+      throw buildError('canOnlyDoHeteroWhenNextIs1hp')
     }
     if (cards.length !== 1) {
-      throw new Error('please play one card as the first to transfer')
+      throw buildError('canOnlyPlay1CardWhenAtFirstTransfer')
     }
     if (getCardType(cards[0]) !== ICardType.MAGE && getCardType(cards[0]) !== ICardType.MISSILE) {
-      throw new Error('cannot play function type as the first to transfer')
+      throw buildError('canOnlyPlayNonFunctionWhenAtFirstTransfer')
     }
     return { ...state, mode }
   }
@@ -154,7 +157,7 @@ const withPlayHomo: IPlayCard = ({ cards }) => state => {
     const cardColor = getCardColor(cards[0])
     if (cardColor !== ICardColor.NONE) {
       if (!areCardsOfColor(cards, getCardColor(state.stage[0]))) {
-        throw new Error(`cannot play color other than ${cardColor} in this homo transfer`)
+        throw buildError('canOnlyPlay$colorInThisHomoTransfer', {}, { color: cardColor })
       }
       return { ...state }
     }
@@ -168,17 +171,27 @@ const withPlayHetero: IPlayCard = ({ cards }) => state => {
       return { ...state }
     }
     if (!hasCardColorNone(cards)) {
+      const type = getCardType(state.stage[0])
       if (!areCardsOfDifferentColor([...state.stage, ...cards])) {
         const stageColors = state.stage.map(card => getCardColor(card))
-        throw new Error(`Color ${cards.map(card => getCardColor(card)).filter(color => stageColors.includes(color)).join(', ')} were played. You may play ${allColors.filter(color => !stageColors.includes(color)).join(',')} during this hetero transfer`)
-      } else if (!areCardsOfTypeOrMagile(cards, getCardType(state.stage[0]))) {
-        if (state.duel) {
-          throw new Error(`You may play ${getCardType(state.stage[0])} only`)
-        } else {
-          throw new Error(`You may play ${getCardType(state.stage[0])} or magile only`)
-        }
+        const colorsPlayed = cards.map(card => getCardColor(card)).filter(color => stageColors.includes(color))
+        const colorsCanPlay = allColors.filter(color => !stageColors.includes(color))
+        throw buildError('$colorsPlayedAnd$colorsCanPlayInThisHetero$typeTransfer', {}, {
+          type,
+          type2: type,
+          colorsPlayed,
+          colorsCanPlay
+        })
       } else {
-        return { ...state }
+        if (!areCardsOfTypeOrMagile(cards, type)) {
+          if (state.duel) {
+            throw buildError('youMayPlay$typeOnly', {}, {type})
+          } else {
+            throw buildError('youMayPlay$typeOrMagileOnly', {}, {type})
+          }
+        } else {
+          return { ...state }
+        }
       }
     }
   }
@@ -192,14 +205,14 @@ const withPlayIgnite: IPlayCard = ({ cards }) => state => {
       if (state.mode === IMode.HETERO) {
         return { ...state, ignited: true }
       } else {
-        throw new Error('cannot play hetero_ignite during homo transfer')
+        throw buildError('cannotPlayHeteroIgniteDuringHomoTransfer')
       }
     }
     if (card === ICard.HOMO_IGNITE) {
       if (state.mode === IMode.HOMO) {
         return { ...state, ignited: true }
       } else {
-        throw new Error('cannot play homo_ignite during hetero transfer')
+        throw buildError('cannotPlayHomoIgniteDuringHeteroTransfer')
       }
     }
   }
@@ -217,7 +230,7 @@ const withPlayAngleGuard: IPlayCard = ({ cards }) => state => {
 
 const withStateChangedValidation = (prevState: GameState): IPlayCard => () => state => {
   if (prevState === state) {
-    throw new Error('invalid move')
+    throw buildError('invalidMove')
   }
   return state
 }
@@ -229,7 +242,7 @@ export const withIncrementTurn: IStateMapper = prevState => {
 
 const withPlayCard: (playerId: number, payload: PlayCardPayload) => IStateMapper = (playerId, payload) => prevState => {
   if (prevState.turn !== playerId) {
-    throw new Error('not your turn')
+    throw buildError('notYourTurn')
   }
   const nextState = compose(
     withCheckWin,
@@ -325,7 +338,8 @@ export const withLog: (log: string) => IStateMapper = log => prevState => {
 
 const withCheckDiscardToHp: IPlayCard = (payload, playerId) => state => {
   if (state.playerDeck[playerId].length - payload.cards.length !== state.playerHp[playerId]) {
-    throw new Error(`should discard ${state.playerDeck[playerId].length - state.playerHp[playerId]} cards`)
+    const count = `${state.playerDeck[playerId].length - state.playerHp[playerId]}`
+    throw buildError('shouldDiscard$countCards', {count})
   }
   return state
 }
