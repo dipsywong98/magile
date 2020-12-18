@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/magile/static/css/main.6dea0f05.chunk.css",
-    "main.js": "/magile/static/js/main.a1ae82be.chunk.js",
-    "main.js.map": "/magile/static/js/main.a1ae82be.chunk.js.map",
-    "runtime-main.js": "/magile/static/js/runtime-main.54e0e9b6.js",
-    "runtime-main.js.map": "/magile/static/js/runtime-main.54e0e9b6.js.map",
-    "static/js/2.af312b7e.chunk.js": "/magile/static/js/2.af312b7e.chunk.js",
-    "static/js/2.af312b7e.chunk.js.map": "/magile/static/js/2.af312b7e.chunk.js.map",
-    "static/js/3.44c7463e.chunk.js": "/magile/static/js/3.44c7463e.chunk.js",
-    "static/js/3.44c7463e.chunk.js.map": "/magile/static/js/3.44c7463e.chunk.js.map",
+    "main.js": "/magile/static/js/main.5b5942fb.chunk.js",
+    "main.js.map": "/magile/static/js/main.5b5942fb.chunk.js.map",
+    "runtime-main.js": "/magile/static/js/runtime-main.80b8b541.js",
+    "runtime-main.js.map": "/magile/static/js/runtime-main.80b8b541.js.map",
+    "static/js/2.1da62c0d.chunk.js": "/magile/static/js/2.1da62c0d.chunk.js",
+    "static/js/2.1da62c0d.chunk.js.map": "/magile/static/js/2.1da62c0d.chunk.js.map",
+    "static/js/3.ea0683bf.chunk.js": "/magile/static/js/3.ea0683bf.chunk.js",
+    "static/js/3.ea0683bf.chunk.js.map": "/magile/static/js/3.ea0683bf.chunk.js.map",
     "index.html": "/magile/index.html",
     "static/css/main.6dea0f05.chunk.css.map": "/magile/static/css/main.6dea0f05.chunk.css.map",
-    "static/js/2.af312b7e.chunk.js.LICENSE.txt": "/magile/static/js/2.af312b7e.chunk.js.LICENSE.txt",
+    "static/js/2.1da62c0d.chunk.js.LICENSE.txt": "/magile/static/js/2.1da62c0d.chunk.js.LICENSE.txt",
     "static/media/angel_guard.16ea5f11.png": "/magile/static/media/angel_guard.16ea5f11.png",
     "static/media/dark_magile.1e723600.png": "/magile/static/media/dark_magile.1e723600.png",
     "static/media/earth_mage.e84ed39c.png": "/magile/static/media/earth_mage.e84ed39c.png",
@@ -29,9 +29,9 @@
     "static/media/wind_missile.c08191d4.png": "/magile/static/media/wind_missile.c08191d4.png"
   },
   "entrypoints": [
-    "static/js/runtime-main.54e0e9b6.js",
-    "static/js/2.af312b7e.chunk.js",
+    "static/js/runtime-main.80b8b541.js",
+    "static/js/2.1da62c0d.chunk.js",
     "static/css/main.6dea0f05.chunk.css",
-    "static/js/main.a1ae82be.chunk.js"
+    "static/js/main.5b5942fb.chunk.js"
   ]
 }
