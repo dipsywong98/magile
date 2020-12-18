@@ -5,6 +5,7 @@ import { cardImages } from '../assets'
 import { CheckCircleOutline } from 'mdi-material-ui'
 import { green, red } from '@material-ui/core/colors'
 import { CancelOutlined } from '@material-ui/icons'
+import { useGamenetI18n } from 'gamenet-material'
 
 const useStyle = makeStyles(() => ({
   root: {
@@ -34,6 +35,7 @@ export const Card: FunctionComponent<{
     isDelete
   }) => {
   const classes = useStyle()
+  const {i18n} = useGamenetI18n()
 
   return (
     <Paper
@@ -47,15 +49,11 @@ export const Card: FunctionComponent<{
       }}
       className={classes.root} onClick={!disabled ? onClick : undefined}>
       <h2 style={{ fontFamily: 'Big Shoulders Inline Text, inherit', margin: 0, color: 'white', textShadow: '5px 3px 8px black' }}>
-        {card}
+        {i18n[card]}
       </h2>
       {selected && <div style={{position: 'absolute', top: 0, right: 0}}>
         {isDelete ? <CancelOutlined style={{ color: red[500] }} fontSize='large'/> : <CheckCircleOutline style={{ color: green[500] }} fontSize='large'/>}
       </div>}
-      {/*<div>*/}
-      {/*  {selected ? 'yes' : 'no'}*/}
-      {/*  /!*  {hintText(card)}*!/*/}
-      {/*</div>*/}
     </Paper>
   )
 }

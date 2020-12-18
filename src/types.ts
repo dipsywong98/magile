@@ -20,8 +20,8 @@ export enum ICard {
 }
 
 export enum IMode {
-  HOMO,
-  HETERO
+  HOMO='homo',
+  HETERO='hetero'
 }
 
 export type IDeck = ICard[]

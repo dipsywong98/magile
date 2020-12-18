@@ -1,13 +1,60 @@
 import { gamenetI18n } from 'gamenet-material'
 import React from 'react'
+import { ICard, ICardColor, ICardType, IMode } from '../types'
 
 export const zh = {
   ...gamenetI18n.zh,
-  magile: '魔法飛彈大作戰',
+  gameName: '魔法飛彈大作戰',
   howToPlay: '玩法',
   howToPlayContent: (
     <div>
       還沒有哦
     </div>
-  )
+  ),
+  [IMode.HOMO]: '同系',
+  [IMode.HETERO]: '異系',
+  [ICardType.MAGE]: '魔彈',
+  [ICardType.MISSILE]: '飛彈',
+  [ICardType.MAGILE]: '魔法飛彈',
+  [ICardType.IGNITE]: '引爆',
+  [ICardType.ANGEL_GUARD]: '天使的庇護',
+  [ICardColor.NONE]: '無屬性',
+  [ICardColor.EARTH]: '地系',
+  [ICardColor.WATER]: '水系',
+  [ICardColor.FIRE]: '火系',
+  [ICardColor.WIND]: '風系',
+  [ICardColor.THUNDER]: '雷系',
+  [ICardColor.LIGHT]: '光系',
+  [ICardColor.DARK]: '暗系',
+  [ICard.EARTH_MAGE]: '地系魔彈',
+  [ICard.WATER_MAGE]: '水系魔彈',
+  [ICard.FIRE_MAGE]: '火系魔彈',
+  [ICard.WIND_MAGE]: '風系魔彈',
+  [ICard.THUNDER_MAGE]: '雷系魔彈',
+  [ICard.EARTH_MISSILE]: '地系飛彈',
+  [ICard.WATER_MISSILE]: '水系飛彈',
+  [ICard.FIRE_MISSILE]: '火系飛彈',
+  [ICard.WIND_MISSILE]: '風系飛彈',
+  [ICard.THUNDER_MISSILE]: '雷系飛彈',
+  [ICard.LIGHT_MAGILE]: '光系魔法飛彈',
+  [ICard.DARK_MAGILE]: '暗系魔法飛彈',
+  [ICard.HOMO_IGNITE]: '同系引爆',
+  [ICard.HETERO_IGNITE]: '異系引爆',
+  [ICard.ANGEL_GUARD]: '天使的庇護',
+  gameOver: '遊戲結束',
+  duelHint: '大決戰! 功能卡失效，每次傷害+1!',
+  igniteHint: '引爆! 只可以用同一種引爆或天使的庇護作響應!',
+  loserIs$player: '輸家是{{player}}',
+  $playerDiscardCardTil$cardCount: '{{player}}棄牌至{{cardCount}}張',
+  $playerInitializingTransfer: '{{player}}開始傳遞',
+  $playerRespondTo$modeTransferCurrent$damage: '{{player}}響應{{mode}}傳遞。目前累積傷害: {{damage}}',
+  again: '再玩一次',
+  drawDeck: '抽牌區',
+  notYourTurn: '不是你的回合哦~',
+  takeHit: '用生命值硬接',
+  areYouSureYouWantToTakeHit: '你確定要用生命值硬接?',
+  respond: '響應',
+  initializeHomoTransfer: '發動同系傳播',
+  initializeHeteroTransfer: '發動異系傳播',
+  trash: '棄卡'
 }

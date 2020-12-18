@@ -5,6 +5,7 @@ import { Button } from '@material-ui/core'
 import { Delete, Flag, PlayArrow, Visibility } from '@material-ui/icons'
 import { PlayCardPayload } from '../GameAction'
 import { Equal, NotEqual } from 'mdi-material-ui'
+import { useGamenetI18n } from 'gamenet-material'
 
 const DURATION = 0.3
 
@@ -39,6 +40,7 @@ export const Deck: FunctionComponent<{
   const [hovering, setHovering] = useState<number | null>(null)
   const [playGetCardAnimation, setPlayGetCardAnimation] = useState(false)
   const [discardingAnimation, setDiscardingAnimation] = useState(false)
+  const {i18n} = useGamenetI18n()
   const [selected, dispatchSelected] = useReducer<(prev: Set<number>, action: { type: string, payload?: number }) => Set<number>>((prev, {
     type,
     payload
@@ -122,7 +124,7 @@ export const Deck: FunctionComponent<{
     left: 0,
     right: 0,
     zIndex: 1,
-    transform: hide ? 'translateY(100%)' : 'translateY(50%)',
+    transform: hide ? 'translateY(100%)' : 'translateY(40%)',
     transition: `transform 0.3s ease-in-out`,
     pointerEvents: 'none'
   }}>
@@ -139,14 +141,14 @@ export const Deck: FunctionComponent<{
       </Button>}
       {!hide && chooseCardFor === ChooseCardFor.RESPOND_PLAY && <>
         <Button variant='contained'
-          title='take hit'
+          title={i18n.takeHit}
           color='secondary'
-          onClick={() => window.confirm('Are you sure you want to take hit?') && takeHit().catch(console.error)}
+          onClick={() => window.confirm(i18n.areYouSureYouWantToTakeHit) && takeHit().catch(console.error)}
         >
           <Flag/>
         </Button>
         <Button style={{marginLeft: '8px'}} variant='contained'
-          title='play'
+          title={i18n.respond}
           color='primary'
           onClick={handlePlayCards}
         >
@@ -155,14 +157,14 @@ export const Deck: FunctionComponent<{
       </>}
       {!hide && chooseCardFor === ChooseCardFor.FIRST_PLAY && <>
         <Button variant='contained'
-          title='homo'
+          title={i18n.initializeHomoTransfer}
           color='primary'
           onClick={() => handlePlayCards(IMode.HOMO)}
         >
           <Equal/>
         </Button>
         <Button style={{marginLeft: '8px'}} variant='contained'
-          title='hetero'
+          title={i18n.initializeHeteroTransfer}
           color='primary'
           onClick={() => handlePlayCards(IMode.HETERO)}
         >
@@ -172,13 +174,13 @@ export const Deck: FunctionComponent<{
       {!hide && chooseCardFor === ChooseCardFor.DISCARD && <>
         <Button variant='contained'
           color='secondary'
-          title='trash'
+          title={i18n.trash}
           onClick={handlePlayCards}
         >
           <Delete/>
         </Button>
       </>}
-      </>: 'not your turn'}
+      </>: i18n.notYourTurn}
     </div>
     <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'nowrap' }}>
       {
@@ -189,7 +191,7 @@ export const Deck: FunctionComponent<{
               card={card}
               onClick={() => handleCardClick(card, index)}
               disabled={hide}
-              style={{ transform: (hovering === index || selected.has(index)) ? 'translateY(-30%)' : 'translateY(-15%)' }}
+              style={{ transform: (hovering === index || selected.has(index)) ? 'translateY(-30%)' : undefined }}
               selected={selected.has(index)}
               isDelete={chooseCardFor === ChooseCardFor.DISCARD}
             />, index)))

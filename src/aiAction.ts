@@ -19,6 +19,9 @@ const countByTypeUniqueColor = (hand: IDeck, excludeMagile: boolean): Record<ICa
     .filter((card, k, cards) => cards.indexOf(card) === k)
     .reduce<Record<ICardType, number>>(((record, card) => {
       const type: ICardType = getCardType(card)
+      if(type === ICardType.MAGILE && excludeMagile) {
+        return record
+      }
       if (type === ICardType.MAGILE && !excludeMagile) {
         return {
           [ICardType.MISSILE]: (record[ICardType.MISSILE] ?? 0) + 1,

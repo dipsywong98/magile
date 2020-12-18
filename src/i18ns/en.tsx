@@ -1,13 +1,60 @@
 import { gamenetI18n } from 'gamenet-material'
 import React from 'react'
+import { ICard, ICardColor, ICardType, IMode } from '../types'
 
 export const en = {
   ...gamenetI18n.en,
-  magile: 'Magile',
+  gameName: 'Magile',
   howToPlay: 'How To Play',
   howToPlayContent: (
     <div>
       TBA
     </div>
-  )
+  ),
+  [IMode.HOMO]: 'Homo',
+  [IMode.HETERO]: 'Hetero',
+  [ICardType.MAGE]: 'Mage',
+  [ICardType.MISSILE]: 'Missile',
+  [ICardType.MAGILE]: 'Magile',
+  [ICardType.IGNITE]: 'Ignite',
+  [ICardType.ANGEL_GUARD]: 'Angel Guard',
+  [ICardColor.NONE]: 'None',
+  [ICardColor.EARTH]: 'Earth',
+  [ICardColor.WATER]: 'Water',
+  [ICardColor.FIRE]: 'Fire',
+  [ICardColor.WIND]: 'Wind',
+  [ICardColor.THUNDER]: 'Thunder',
+  [ICardColor.LIGHT]: 'Light',
+  [ICardColor.DARK]: 'Dark',
+  [ICard.EARTH_MAGE]: 'Earth Mage',
+  [ICard.WATER_MAGE]: 'Water Mage',
+  [ICard.FIRE_MAGE]: 'Fire Mage',
+  [ICard.WIND_MAGE]: 'Wind Mage',
+  [ICard.THUNDER_MAGE]: 'Thunder Mage',
+  [ICard.EARTH_MISSILE]: 'Earth Missile',
+  [ICard.WATER_MISSILE]: 'Water Missile',
+  [ICard.FIRE_MISSILE]: 'Fire Missile',
+  [ICard.WIND_MISSILE]: 'Wind Missile',
+  [ICard.THUNDER_MISSILE]: 'Thunder Missile',
+  [ICard.LIGHT_MAGILE]: 'Light Magile',
+  [ICard.DARK_MAGILE]: 'Dark Magile',
+  [ICard.HOMO_IGNITE]: 'Homo Ignite',
+  [ICard.HETERO_IGNITE]: 'Hetero Ignite',
+  [ICard.ANGEL_GUARD]: 'Angel Guard',
+  gameOver: 'Game Over',
+  duelHint: 'DUEL! NO Function card and each hit will deduct 1 more hp!',
+  igniteHint: 'IGNITED! Respond only with same ignited or angel guard!',
+  loserIs$player: 'Loser is $player',
+  $playerDiscardCardTil$cardCount: '$player discard card til $cardCount',
+  $playerInitializingTransfer: '$player initializing transfer',
+  $playerRespondTo$modeTransferCurrent$damage: '$player responding to $mode transfer. Current damage: $damage',
+  again: 'Again',
+  drawDeck: 'Draw Deck',
+  notYourTurn: 'Not Your Turn',
+  takeHit: 'Take Hit',
+  areYouSureYouWantToTakeHit: 'Are you sure you want to take hit?',
+  respond: 'Respond',
+  initializeHomoTransfer: 'Initialize Homo Transfer',
+  initializeHeteroTransfer: 'Initialize Hetero Transfer',
+  trash: 'Trash'
 }

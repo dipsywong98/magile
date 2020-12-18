@@ -5,6 +5,7 @@ import { Card } from './Card'
 import { IDeck, IMode } from '../types'
 import { computeDamage } from '../utils'
 import { Button } from '@material-ui/core'
+import { i18nSub, useGamenetI18n } from 'gamenet-material'
 
 const Name: FunctionComponent = (props) => (
   <div {...props}/>
@@ -15,6 +16,7 @@ export const GameRenderer = () => {
   const [prevCardPayload, setPrevCardPayload] = useState<null | IDeck>(null)
   const [startAnimateCard, setStartAnimateCard] = useState(false)
   const [showAnimateCard, setShowAnimateCard] = useState(false)
+  const {i18n} = useGamenetI18n()
   useEffect(() => {
     setShowAnimateCard(true)
     setTimeout(() => {
@@ -39,15 +41,19 @@ export const GameRenderer = () => {
   const status = (() => {
     if (state.started) {
       if(state.winner !== null) {
-        return `Loser is ${state.players[state.winner]}`
+        const player = state.players[state.winner]
+        return i18nSub(i18n.loserIs$player, {player})
       }
+      const player = state.players[state.turn]
       if (state.playerDeck[state.turn].length > state.playerHp[state.turn]) {
-        return `${state.players[state.turn]} discard card til ${state.playerHp[state.turn]}`
+        return i18nSub(i18n.$playerDiscardCardTil$cardCount, {player, cardCount: `${state.playerHp[state.turn]}`})
       }
       if (state.stage.length === 0) {
-        return `${state.players[state.turn]} initializing transfer`
+        return i18nSub(i18n.$playerInitializingTransfer, {player})
       } else {
-        return `${state.players[state.turn]} responding to ${state.mode === IMode.HOMO ? 'homo' : 'hetero'} transfer. Current damage: ${computeDamage(state)}`
+        const mode = i18n[state.mode ?? IMode.HOMO]
+        const damage = `${computeDamage(state)}`
+        return i18nSub(i18n.$playerRespondTo$modeTransferCurrent$damage, {player, mode, damage})
       }
     }
     return undefined
@@ -55,13 +61,13 @@ export const GameRenderer = () => {
   const hint = (() => {
     if(state.started) {
       if(state.winner !== null) {
-        return `Game Over`
+        return i18n.gameOver
       }
       if(state.duel) {
-        return 'DUEL! NO Function card and each hit will deduct 1 more hp!'
+        return i18n.duelHint
       }
       if(state.ignited) {
-        return 'IGNITED! Respond only with same ignited or angel guard!'
+        return i18n.ignitedHint
       }
     }
     return undefined
@@ -95,14 +101,14 @@ export const GameRenderer = () => {
         {/*{myPlayerId === undefined && <Name offset={0}/>}*/}
         {prevCardPayload !== null &&
         <div style={{ position: 'absolute', ...center }}>
-          <div style={{ transform: 'translate(-50%,-50%)', textAlign: 'center' }}>
+          <div style={{ transform: 'translate(-50%,-100%)', textAlign: 'center' }}>
             {hint && <h3>{hint}</h3>}
             <h1>{status}</h1>
             {state.winner !== undefined && state.winner !== null && <div>
-              <Button variant="contained" color='primary' onClick={again}>again</Button>
+              <Button variant="contained" color='primary' onClick={again}>{i18n.again}</Button>
             </div>}
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              {prevCardPayload.map(card => <div style={{ padding: '8px' }}><Card card={card} disabled/></div>)}
+            <div style={{ display: 'flex', justifyContent: 'center', maxWidth: 'calc(100vw - 32px)', flexWrap: 'wrap', marginRight: 'auto', marginLeft: 'auto', marginBottom: '70px' }}>
+              {prevCardPayload.map(card => <div style={{ padding: '8px', maxHeight: '70px' }}><Card card={card} disabled/></div>)}
             </div>
           </div>
         </div>}
@@ -117,7 +123,7 @@ export const GameRenderer = () => {
             {state.lastAction.cards.map(card => <div style={{ padding: '8px' }}><Card card={card} disabled/></div>)}
           </div>
         </div>}
-        <h3 style={{ position: 'absolute', bottom: 0, right: '20px' }}>Draw Deck: {state.drawDeck.length}</h3>
+        <h3 style={{ position: 'absolute', bottom: 0, right: '20px' }}>{i18n.drawDeck}: {state.drawDeck.length}</h3>
       </div>
   )
 }
