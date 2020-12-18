@@ -8,10 +8,11 @@ import {
   areCardsOfColor,
   areCardsOfDifferentColor,
   areCardsOfTypeOrMagile,
-  basicDamage, buildError, computeDamage,
+  buildError,
+  computeDamage,
   getCardColor,
   getCardType,
-  hasCardColorNone
+  hasCardColorNone, isActionCard
 } from './utils'
 
 const getFullDeck = (): IDeck => {
@@ -40,14 +41,14 @@ const withDrawCard: (playerId: number) => IStateMapper = playerId => state => {
   }
 }
 
-const withEnsureHp1CardNotFunctionCard: (playerId: number) => IStateMapper = playerId => state => {
-  if (state.playerHp[playerId] === 1) {
-    const cardType = getCardType(state.playerDeck[playerId][0])
-    if (state.playerDeck[playerId].length === 1 && cardType !== ICardType.MAGE && cardType !== ICardType.MISSILE)
+const withEnsureDuelNotFunctionCard: (playerId: number) => IStateMapper = playerId => state => {
+  if (state.duel) {
+    const hand = state.playerDeck[playerId]
+    if (hand.filter(isActionCard).length === hand.length)
       return compose(
-        withEnsureHp1CardNotFunctionCard(playerId),
+        withEnsureDuelNotFunctionCard(playerId),
         withDrawCard(playerId),
-        withDiscardCard({ cards: state.playerDeck[playerId] }, playerId)
+        withDiscardCard({ cards: hand }, playerId)
       )(state)
   }
   return state
@@ -185,9 +186,9 @@ const withPlayHetero: IPlayCard = ({ cards }) => state => {
       } else {
         if (!areCardsOfTypeOrMagile(cards, type)) {
           if (state.duel) {
-            throw buildError('youMayPlay$typeOnly', {}, {type})
+            throw buildError('youMayPlay$typeOnly', {}, { type })
           } else {
-            throw buildError('youMayPlay$typeOrMagileOnly', {}, {type})
+            throw buildError('youMayPlay$typeOrMagileOnly', {}, { type })
           }
         } else {
           return { ...state }
@@ -248,7 +249,7 @@ const withPlayCard: (playerId: number, payload: PlayCardPayload) => IStateMapper
     withCheckWin,
     withCheckHit,
     withIncrementTurn,
-    withEnsureHp1CardNotFunctionCard(playerId),
+    withEnsureDuelNotFunctionCard(playerId),
     withDrawCard(playerId),
     ...[
       withPutToPlayed,
@@ -334,7 +335,7 @@ export const withLog: (log: string) => IStateMapper = log => prevState => {
 const withCheckDiscardToHp: IPlayCard = (payload, playerId) => state => {
   if (state.playerDeck[playerId].length - payload.cards.length !== state.playerHp[playerId]) {
     const count = `${state.playerDeck[playerId].length - state.playerHp[playerId]}`
-    throw buildError('shouldDiscard$countCards', {count})
+    throw buildError('shouldDiscard$countCards', { count })
   }
   return state
 }
@@ -369,7 +370,7 @@ export const GameReducer: NetworkReducer<GameState, GameAction> = (prevState, ac
     case GameActionType.PLAY_CARD:
       return withPlayCard(playerId(), action.payload)(JSON.parse(JSON.stringify(prevState)))
     case GameActionType.DISCARD_CARD:
-      return compose(withClearStage, ...[withDiscardCard, withCheckDiscardToHp].map(step => step(action.payload, playerId())))(JSON.parse(JSON.stringify(prevState)))
+      return compose(withEnsureDuelNotFunctionCard(playerId()), withClearStage, ...[withDiscardCard, withCheckDiscardToHp].map(step => step(action.payload, playerId())))(JSON.parse(JSON.stringify(prevState)))
     case GameActionType.TAKE_HIT:
       return withCheckWin(withHit(prevState))
     case GameActionType.END:

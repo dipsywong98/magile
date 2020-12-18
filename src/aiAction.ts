@@ -3,10 +3,11 @@ import { GameAction, GameActionType } from './GameAction'
 import { getCardColor, getCardType, isActionCard, randInt } from './utils'
 import { allColors, ICard, ICardColor, ICardType, IDeck, IMode } from './types'
 
-const countByColor = (hand: IDeck): Record<ICardColor, number> => {
+const countByColor = (hand: IDeck, excludeMagile: boolean): Record<ICardColor, number> => {
   return hand
     .map(card => getCardColor(card))
     .filter(color => color !== ICardColor.NONE)
+    .filter(color => !excludeMagile || ![ICardColor.LIGHT, ICardColor.DARK].includes(color))
     .reduce<Record<ICardColor, number>>(((previousValue, currentValue) => ({
       ...previousValue,
       [currentValue]: (previousValue[currentValue] ?? 0) + 1
@@ -71,7 +72,7 @@ const aiDiscard = (state: GameState, turn: number): GameAction => {
 
 const aiFirstCard = (state: GameState, turn: number): GameAction => {
   const hand: ICard[] = [...state.playerDeck[turn]]
-  const byColor: Array<[ICardColor, number]> = sortDict(countByColor(hand))
+  const byColor: Array<[ICardColor, number]> = sortDict(countByColor(hand, true))
   const byType: Array<[ICardType, number]> = sortDict(countByTypeUniqueColor(hand, state.duel))
   const nextPlayerHp = state.playerHp[(turn + 1) % state.playerHp.length]
   console.log({ byColor, byType })
