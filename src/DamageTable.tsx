@@ -9,8 +9,8 @@ export const DamageTable: FunctionComponent = () => {
       <Table style={{ width: '100%' }} size="small">
         <TableHead>
           <TableRow>
-            <TableCell>{i18n.mode}</TableCell>
-            <TableCell>{i18n.count}</TableCell>
+            <TableCell>{i18n.transferMode}</TableCell>
+            <TableCell>{i18n.mmmCount}</TableCell>
             <TableCell>{i18n.damage}</TableCell>
           </TableRow>
         </TableHead>

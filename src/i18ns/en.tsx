@@ -73,9 +73,9 @@ export const en = {
   cannotPlayHeteroIgniteDuringHomoTransfer: 'Cannot Play Hetero Ignite during Homo transfer',
   invalidMove: 'invalidMove',
   shouldDiscard$countCards: 'should discard {{count}} cards',
-  mode: 'mode',
-  count: 'count',
-  damage: 'damage',
+  transferMode: 'Transfer Mode',
+  mmmCount: 'Mage/Missile/Magile count on stage',
+  damage: 'Damage',
   damageTableHint: 'After playing first ignite in the transfer, each additional ignite damage+1; during duel damage+1.',
   damageTable: 'Damage Table',
   close: 'close'
