@@ -323,10 +323,7 @@ const withHit = (state: GameState): GameState => {
     playerHp[turn] -= hit
     return {
       ...state,
-      playerHp,
-      ignited: false,
-      duel: state.duel || playerHp[turn] <= 3,
-      mode: null
+      playerHp
     }
   }
   return state
@@ -349,7 +346,10 @@ const withClearStage: IStateMapper = state => {
     ...state,
     stage: [],
     trashDeck: [...state.stage],
-    lastAction: null
+    lastAction: null,
+    ignited: false,
+    duel: state.duel || state.playerHp[state.turn] <= 3,
+    mode: null
   }
 }
 
