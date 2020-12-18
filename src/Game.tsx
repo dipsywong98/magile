@@ -2,10 +2,10 @@ import React, { FunctionComponent, useEffect, useState } from 'react'
 import { usePoker99 } from './withGameNetwork'
 import { GameAction, GameActionType, PlayCardPayload } from './GameAction'
 import { ChooseCardFor, Deck } from './components/Deck'
-// import { PlayCardAdditionalModal } from './components/PlayCardAdditionalModal'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core'
 import { decodeError } from './utils'
 import { useGamenetI18n } from 'gamenet-material'
+import { IDeck } from './types'
 
 export const Game: FunctionComponent = () => {
   const {
@@ -73,7 +73,7 @@ export const Game: FunctionComponent = () => {
     setTimeout(() => {
       setTrottledRenderedId(renderedDeckId)
     }, 500)
-  }, [renderedDeckId])
+  }, [renderedDeckId, myPlayerId])
   const again = async (): Promise<void> => {
     await dispatch({
       type: GameActionType.END
@@ -93,6 +93,14 @@ export const Game: FunctionComponent = () => {
       await playCard(payload)
     }
   }
+  const onReorder = async (cards: IDeck): Promise<void> => {
+    await dispatch({
+      type: GameActionType.REORDER,
+      payload: {
+        cards
+      }
+    }).catch(handleError)
+  }
   return (
     <div style={{ pointerEvents: 'all', color: 'white' }}>
       {state.started && myPlayerId !== undefined &&
@@ -104,6 +112,7 @@ export const Game: FunctionComponent = () => {
         reveal={() => setHideDeck(false)}
         takeHit={takeHit}
         myTurn={myTurn}
+        onReorder={onReorder}
       />}
       <div style={{ maxHeight: '50%' }}>
         {state.logs.slice().reverse().map((s, k) => <div key={k}>{s}</div>)}

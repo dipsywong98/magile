@@ -109,7 +109,7 @@ export const GameRenderer = () => {
             {state.winner !== undefined && state.winner !== null && <div>
               <Button variant="contained" color='primary' onClick={again}>{i18n.again}</Button>
             </div>}
-            <h3>{i18nSub(i18n.current$damage, {damage})}</h3>
+            <h3>{state.mode && `${i18n[state.mode]}, `}{i18nSub(i18n.current$damage, {damage})}</h3>
             <div style={{ display: 'flex', justifyContent: 'center', maxWidth: 'calc(100vw - 32px)', flexWrap: 'wrap', marginRight: 'auto', marginLeft: 'auto', marginBottom: '70px' }}>
               {prevCardPayload.map(card => <div style={{ padding: '8px', maxHeight: '70px' }}><Card card={card} disabled/></div>)}
             </div>

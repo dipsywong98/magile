@@ -7,12 +7,13 @@ import { cardCount } from './constants'
 import {
   areCardsOfColor,
   areCardsOfDifferentColor,
-  areCardsOfTypeOrMagile,
+  areCardsOfTypeOrMagile, arraySameContent,
   buildError,
   computeDamage,
   getCardColor,
   getCardType,
-  hasCardColorNone, isActionCard
+  hasCardColorNone,
+  isActionCard
 } from './utils'
 
 const getFullDeck = (): IDeck => {
@@ -352,6 +353,15 @@ const withClearStage: IStateMapper = state => {
   }
 }
 
+const reorder = (cards: IDeck, playerId: number) => (state: GameState): GameState => {
+  if (!arraySameContent(cards, state.playerDeck[playerId])) {
+    throw new Error('Cards not consistent')
+  }
+  const playerDeck = [...state.playerDeck]
+  playerDeck[playerId] = cards
+  return { ...state, playerDeck }
+}
+
 export const GameReducer: NetworkReducer<GameState, GameAction> = (prevState, action) => {
   const peerId = action.peerId
   if (peerId === undefined) {
@@ -375,6 +385,8 @@ export const GameReducer: NetworkReducer<GameState, GameAction> = (prevState, ac
       return withCheckWin(withHit(prevState))
     case GameActionType.END:
       return { ...prevState, started: false, ready: {} }
+    case GameActionType.REORDER:
+      return reorder(action.payload.cards, playerId())(prevState)
   }
   return prevState
 }

@@ -1,11 +1,13 @@
 import React, { FunctionComponent, ReactNode, useEffect, useReducer, useState } from 'react'
-import { ICard, IMode } from '../types'
+import { ICard, IDeck, IMode } from '../types'
 import { Card } from './Card'
 import { Button } from '@material-ui/core'
 import { Delete, Flag, PlayArrow, Visibility } from '@material-ui/icons'
 import { PlayCardPayload } from '../GameAction'
 import { Equal, NotEqual } from 'mdi-material-ui'
 import { useGamenetI18n } from 'gamenet-material'
+import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd'
+import { reorderInPlace } from '../utils'
 
 const DURATION = 0.3
 
@@ -34,36 +36,41 @@ export enum ChooseCardFor {
 }
 
 export const Deck: FunctionComponent<{
-  cards: ICard[], hide: boolean, reveal: () => void, onCardsChoose: (payload: PlayCardPayload) => Promise<void>, chooseCardFor: ChooseCardFor, takeHit: () => Promise<void>, myTurn?: boolean
-}> = ({ cards, hide, reveal, onCardsChoose, chooseCardFor, takeHit, myTurn }) => {
+  cards: ICard[], hide: boolean, reveal: () => void, onCardsChoose: (payload: PlayCardPayload) => Promise<void>, chooseCardFor: ChooseCardFor, takeHit: () => Promise<void>, myTurn?: boolean, onReorder: (cards: IDeck) => Promise<void>
+}> = ({ cards, hide, reveal, onCardsChoose, chooseCardFor, takeHit, myTurn, onReorder }) => {
   const [playedIndices, setPlayedIndices] = useState<number[]>([])
   const [hovering, setHovering] = useState<number | null>(null)
   const [playGetCardAnimation, setPlayGetCardAnimation] = useState(false)
   const [discardingAnimation, setDiscardingAnimation] = useState(false)
-  const {i18n} = useGamenetI18n()
-  const [selected, dispatchSelected] = useReducer<(prev: Set<number>, action: { type: string, payload?: number }) => Set<number>>((prev, {
+  const { i18n } = useGamenetI18n()
+  const [selected, dispatchSelected] = useReducer<(prev: boolean[], action: { type: string, payload?: number | boolean[] }) => boolean[]>((prev, {
     type,
     payload
   }) => {
     switch (type) {
       case 'add':
-        if (payload !== undefined) {
-          prev.add(payload)
+        if (payload !== undefined && !Array.isArray(payload)) {
+          prev[payload] = true
         }
-        return new Set(prev)
+        return [...prev]
       case 'delete':
-        if (payload !== undefined) {
-          prev.delete(payload)
+        if (payload !== undefined && !Array.isArray(payload)) {
+          prev[payload] = false
         }
-        return new Set(prev)
+        return [...prev]
       case 'clear':
-        return new Set()
+        return []
+      case 'override':
+        if (Array.isArray(payload)) {
+          return [...payload]
+        }
+        return prev
       default:
         return prev
     }
-  }, new Set<number>())
+  }, [])
   const handleCardClick = async (card: ICard, index: number) => {
-    if (selected.has(index)) {
+    if (selected[index]) {
       dispatchSelected({ type: 'delete', payload: index })
     } else {
       dispatchSelected({ type: 'add', payload: index })
@@ -72,11 +79,11 @@ export const Deck: FunctionComponent<{
   const handlePlayCards = (param: unknown) => {
     const mode = param === IMode.HOMO || param === IMode.HETERO ? param : undefined
     const laterSetDiscardingAnimation = chooseCardFor === ChooseCardFor.DISCARD
-    onCardsChoose({ cards: cards.filter((_, k) => selected.has(k)), mode })
+    onCardsChoose({ cards: cards.filter((_, k) => selected[k]), mode })
       .then(() => {
         setDiscardingAnimation(laterSetDiscardingAnimation)
         setHovering(null)
-        setPlayedIndices(Array.from(selected))
+        setPlayedIndices(selected.map((b, k: number) => [b, k]).filter(([b]) => b).map(([_, k]) => k as number))
         dispatchSelected({ type: 'clear' })
         setTimeout(() => {
           setPlayGetCardAnimation(true)
@@ -104,12 +111,25 @@ export const Deck: FunctionComponent<{
     }
     return discardingAnimation ? [...cardsToRender, ...cards.slice(j)] : cardsToRender
   }
+  const onDragEnd = (result: DropResult) => {
+    const from = result.source.index
+    const to = result.destination?.index
+    if (from !== undefined && to !== undefined) {
+      reorderInPlace(cards, from, to)
+      reorderInPlace(selected, from, to)
+      dispatchSelected({
+        type: 'override',
+        payload: selected
+      })
+      onReorder(cards).catch(console.error)
+    }
+  }
   const withMaxWidth = (children: ReactNode, index: number, noPad = false) => (
     <div
       style={{
         padding: noPad ? 0 : '8px',
         maxWidth: `calc(100vw / ${cards.length + 2})`,
-        transition: `max-width ${DURATION/3}s ease-in-out`
+        transition: `max-width ${DURATION / 3}s ease-in-out`
       }}
       onMouseEnter={() => setHovering(index)}
       onTouchStart={() => setHovering(index)}
@@ -119,13 +139,12 @@ export const Deck: FunctionComponent<{
     </div>
   )
   return <div style={{
-    position: 'fixed',
-    bottom: 0,
+    position: 'absolute',
+    bottom: hide ? '-200px' : '-100px',
     left: 0,
     right: 0,
     zIndex: 1,
-    transform: hide ? 'translateY(100%)' : 'translateY(40%)',
-    transition: `transform 0.3s ease-in-out`,
+    transition: `bottom 0.3s ease-in-out`,
     pointerEvents: 'none'
   }}>
     <div style={{
@@ -136,87 +155,116 @@ export const Deck: FunctionComponent<{
       pointerEvents: 'all'
     }}>
       {myTurn ? <>
-      {hide && <Button variant='contained' onClick={reveal}>
-        <Visibility/>
-      </Button>}
-      {!hide && chooseCardFor === ChooseCardFor.RESPOND_PLAY && <>
-        <Button variant='contained'
-          title={i18n.takeHit}
-          color='secondary'
-          onClick={() => window.confirm(i18n.areYouSureYouWantToTakeHit) && takeHit().catch(console.error)}
-        >
-          <Flag/>
-        </Button>
-        <Button style={{marginLeft: '8px'}} variant='contained'
-          title={i18n.respond}
-          color='primary'
-          onClick={handlePlayCards}
-        >
-          <PlayArrow/>
-        </Button>
-      </>}
-      {!hide && chooseCardFor === ChooseCardFor.FIRST_PLAY && <>
-        <Button variant='contained'
-          title={i18n.initializeHomoTransfer}
-          color='primary'
-          onClick={() => handlePlayCards(IMode.HOMO)}
-        >
-          <Equal/>
-        </Button>
-        <Button style={{marginLeft: '8px'}} variant='contained'
-          title={i18n.initializeHeteroTransfer}
-          color='primary'
-          onClick={() => handlePlayCards(IMode.HETERO)}
-        >
-          <NotEqual/>
-        </Button>
-      </>}
-      {!hide && chooseCardFor === ChooseCardFor.DISCARD && <>
-        <Button variant='contained'
-          color='secondary'
-          title={i18n.trash}
-          onClick={handlePlayCards}
-        >
-          <Delete/>
-        </Button>
-      </>}
-      </>: i18n.notYourTurn}
+        {hide && <Button variant='contained' onClick={reveal}>
+          <Visibility/>
+        </Button>}
+        {!hide && chooseCardFor === ChooseCardFor.RESPOND_PLAY && <>
+          <Button variant='contained'
+                  title={i18n.takeHit}
+                  color='secondary'
+                  onClick={() => window.confirm(i18n.areYouSureYouWantToTakeHit) && takeHit().catch(console.error)}
+          >
+            <Flag/>
+          </Button>
+          <Button style={{ marginLeft: '8px' }} variant='contained'
+                  title={i18n.respond}
+                  color='primary'
+                  onClick={handlePlayCards}
+          >
+            <PlayArrow/>
+          </Button>
+        </>}
+        {!hide && chooseCardFor === ChooseCardFor.FIRST_PLAY && <>
+          <Button variant='contained'
+                  title={i18n.initializeHomoTransfer}
+                  color='primary'
+                  onClick={() => handlePlayCards(IMode.HOMO)}
+          >
+            <Equal/>
+          </Button>
+          <Button style={{ marginLeft: '8px' }} variant='contained'
+                  title={i18n.initializeHeteroTransfer}
+                  color='primary'
+                  onClick={() => handlePlayCards(IMode.HETERO)}
+          >
+            <NotEqual/>
+          </Button>
+        </>}
+        {!hide && chooseCardFor === ChooseCardFor.DISCARD && <>
+          <Button variant='contained'
+                  color='secondary'
+                  title={i18n.trash}
+                  onClick={handlePlayCards}
+          >
+            <Delete/>
+          </Button>
+        </>}
+      </> : i18n.notYourTurn}
     </div>
-    <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'nowrap' }}>
-      {
-        getPlayedCards().map((card, index) => (
-          card === null
-            ? <PlaceHolder key={index} maxWidth={`calc(100vw / ${cards.length + 2} + 16px)`}/>
-            : withMaxWidth(<Card
-              card={card}
-              onClick={() => handleCardClick(card, index)}
-              disabled={hide}
-              style={{ transform: (hovering === index || selected.has(index)) ? 'translateY(-30%)' : undefined }}
-              selected={selected.has(index)}
-              isDelete={chooseCardFor === ChooseCardFor.DISCARD}
-            />, index)))
-      }
-      {playedIndices.length > 0 && !discardingAnimation && <div style={{
-        maxWidth: playGetCardAnimation ? `calc((100vw / ${cards.length + 2} + 16px) * ${playedIndices.length})` : '0',
-        transition: `max-width ${DURATION}s ease-in-out`,
-        display: 'flex',
-        flexWrap: 'nowrap'
-      }}>
-        {
-          cards.slice(cards.length - playedIndices.length).map((card, index) => (
-            withMaxWidth(
-              <Card
-                card={card}
-                onClick={() => handleCardClick(card, index)}
-                disabled={hide}
-                style={{ transform: !playGetCardAnimation ? 'translateX(100vw)' : undefined }}
-                selected={selected.has(index)}
-              />
-              , index + cards.length, false
-            )
-          ))
-        }
-      </div>}
-    </div>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId='droppable' direction='horizontal'>
+        {(provided, snapshot) => (
+          <div ref={provided.innerRef} {...provided.droppableProps}>
+            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'nowrap' }}>
+              {
+                getPlayedCards().map((card, index) => (
+                  <Draggable index={index} draggableId={index.toString()}>
+                    {(provided, snapshot) => (
+                      <div ref={provided.innerRef}
+                           {...provided.draggableProps}
+                           {...provided.dragHandleProps}>{
+                        card === null
+                          ? <PlaceHolder key={index} maxWidth={`calc(100vw / ${cards.length + 2} + 16px)`}/>
+                          : withMaxWidth(<Card
+                            card={card}
+                            onClick={() => !snapshot.isDragging && handleCardClick(card, index)}
+                            disabled={hide}
+                            style={{ transform: !snapshot.isDragging && (hovering === index || selected[index]) ? 'translateY(-30%)' : undefined }}
+                            selected={selected[index]}
+                            isDelete={chooseCardFor === ChooseCardFor.DISCARD}
+                          />, index)
+
+                      }</div>)}
+                  </Draggable>))
+              }
+              {provided.placeholder}
+              {playedIndices.length > 0 && !discardingAnimation &&
+              <Draggable index={cards.length + 1} draggableId='incoming'>
+                {(provided, snapshot) => (
+                  <div ref={provided.innerRef}
+                       {...provided.draggableProps}
+                       {...provided.dragHandleProps}>
+                    <div style={{
+                      maxWidth: playGetCardAnimation ? `calc((100vw / ${cards.length + 2} + 16px) * ${playedIndices.length})` : '0',
+                      transition: `max-width ${DURATION}s ease-in-out`,
+                      display: 'flex',
+                      flexWrap: 'nowrap'
+                    }}>
+                      {
+                        cards.slice(cards.length - playedIndices.length).map((card, index) => (
+                          withMaxWidth(
+                            <Card
+                              card={card}
+                              onClick={() => handleCardClick(card, index)}
+                              disabled={hide}
+                              style={{ transform: !playGetCardAnimation ? 'translateX(100vw)' : undefined }}
+                              selected={selected[index]}
+                            />
+                            , index + cards.length, false
+                          )
+                        ))
+                      }
+                    </div>
+                  </div>
+                )}
+              </Draggable>
+              }
+            </div>
+          </div>
+
+        )}
+      </Droppable>
+
+    </DragDropContext>
   </div>
 }

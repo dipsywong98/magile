@@ -171,3 +171,23 @@ export const decodeError = (error: Error, i18n: Record<string, unknown>): string
   return i18nSub(i18n[messageKey] as string, { ...values })
 }
 
+export const arraySameContent = <T>(a: T[], b: T[]): boolean => {
+  if(a === b) return true
+  if(a.length !== b.length) return false
+  return a.reduce<boolean>((flag, element) => flag && a.filter(e => e === element).length === b.filter(e => e === element).length, true)
+}
+
+export const reorder = <T>(list: T[], startIndex: number, endIndex: number): T[] => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
+
+export const reorderInPlace = <T>(list: T[], startIndex: number, endIndex: number): void => {
+  const result = reorder(list, startIndex, endIndex)
+  for(let i = 0; i < result.length; i++) {
+    list[i] = result[i]
+  }
+};

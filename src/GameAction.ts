@@ -1,14 +1,15 @@
 // GameAction.ts
 
 import { GameActionTypes, GenericBoardGameAction } from 'gamenet'
-import { ICard, IMode } from './types'
+import { ICard, IDeck, IMode } from './types'
 import { NetworkAction } from 'smnet'
 
 export enum GameActionType {
   PLAY_CARD,
   END,
   DISCARD_CARD,
-  TAKE_HIT
+  TAKE_HIT,
+  REORDER
 }
 
 export interface PlayCardPayload {
@@ -26,6 +27,9 @@ export type GameAction = (({
   type: GameActionType.END
 } | {
   type: GameActionType.TAKE_HIT
+}  | {
+  type: GameActionType.REORDER
+  payload: {cards: IDeck}
 } | {
   type: GameActionTypes
   payload: never

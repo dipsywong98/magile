@@ -75,9 +75,8 @@ const aiFirstCard = (state: GameState, turn: number): GameAction => {
   const byColor: Array<[ICardColor, number]> = sortDict(countByColor(hand, true))
   const byType: Array<[ICardType, number]> = sortDict(countByTypeUniqueColor(hand, state.duel))
   const nextPlayerHp = state.playerHp[(turn + 1) % state.playerHp.length]
-  console.log({ byColor, byType })
   const magileCount = hand.filter(card => getCardType(card) === ICardType.MAGILE).length
-  const mode = nextPlayerHp !== 1 && !(byColor[0][1] + 1 <= byType[0][1] && magileCount < byType[0][1]) ? IMode.HOMO : IMode.HETERO
+  const mode = state.playerHp[turn] !== 1 && nextPlayerHp !== 1 && !(byColor[0][1] + 1 <= byType[0][1] && magileCount < byType[0][1]) ? IMode.HOMO : IMode.HETERO
   if (mode === IMode.HOMO) {
     return buildPlayCardAction([hand.find((card) => getCardColor(card) === byColor[0][0]) as ICard], mode)
   } else {
@@ -123,7 +122,6 @@ const aiPlayCard = (state: GameState, playerId: number): GameAction => {
           return false
         }
       })
-      console.log('playable colors', playableColors, cards)
       if (cards.length > 3) {
         return buildPlayCardAction(cards.slice(0, 3))
       }
