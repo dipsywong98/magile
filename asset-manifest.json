@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/magile/static/css/main.6dea0f05.chunk.css",
-    "main.js": "/magile/static/js/main.f85ca7f1.chunk.js",
-    "main.js.map": "/magile/static/js/main.f85ca7f1.chunk.js.map",
+    "main.js": "/magile/static/js/main.a3db84e3.chunk.js",
+    "main.js.map": "/magile/static/js/main.a3db84e3.chunk.js.map",
     "runtime-main.js": "/magile/static/js/runtime-main.aff43b6b.js",
     "runtime-main.js.map": "/magile/static/js/runtime-main.aff43b6b.js.map",
-    "static/js/2.e9e6c8d3.chunk.js": "/magile/static/js/2.e9e6c8d3.chunk.js",
-    "static/js/2.e9e6c8d3.chunk.js.map": "/magile/static/js/2.e9e6c8d3.chunk.js.map",
+    "static/js/2.4443e4e8.chunk.js": "/magile/static/js/2.4443e4e8.chunk.js",
+    "static/js/2.4443e4e8.chunk.js.map": "/magile/static/js/2.4443e4e8.chunk.js.map",
     "static/js/3.4c06203c.chunk.js": "/magile/static/js/3.4c06203c.chunk.js",
     "static/js/3.4c06203c.chunk.js.map": "/magile/static/js/3.4c06203c.chunk.js.map",
     "index.html": "/magile/index.html",
     "static/css/main.6dea0f05.chunk.css.map": "/magile/static/css/main.6dea0f05.chunk.css.map",
-    "static/js/2.e9e6c8d3.chunk.js.LICENSE.txt": "/magile/static/js/2.e9e6c8d3.chunk.js.LICENSE.txt",
+    "static/js/2.4443e4e8.chunk.js.LICENSE.txt": "/magile/static/js/2.4443e4e8.chunk.js.LICENSE.txt",
     "static/media/angel_guard.16ea5f11.png": "/magile/static/media/angel_guard.16ea5f11.png",
     "static/media/dark_magile.1e723600.png": "/magile/static/media/dark_magile.1e723600.png",
     "static/media/earth_mage.e84ed39c.png": "/magile/static/media/earth_mage.e84ed39c.png",
@@ -30,8 +30,8 @@
   },
   "entrypoints": [
     "static/js/runtime-main.aff43b6b.js",
-    "static/js/2.e9e6c8d3.chunk.js",
+    "static/js/2.4443e4e8.chunk.js",
     "static/css/main.6dea0f05.chunk.css",
-    "static/js/main.f85ca7f1.chunk.js"
+    "static/js/main.a3db84e3.chunk.js"
   ]
 }
