@@ -83,7 +83,7 @@ export const Game: FunctionComponent = () => {
   if(state.stage.length === 0) {
     chooseCardFor = ChooseCardFor.FIRST_PLAY
   }
-  if(throttledRenderedId !== undefined && throttledRenderedId !== null && state.playerDeck[throttledRenderedId].length > state.playerHp[throttledRenderedId]) {
+  if(state.started && throttledRenderedId !== undefined && throttledRenderedId !== null && state.playerDeck[throttledRenderedId].length > state.playerHp[throttledRenderedId]) {
     chooseCardFor = ChooseCardFor.DISCARD
   }
   const handleCardChoose = async (payload: PlayCardPayload) => {

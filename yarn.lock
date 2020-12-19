@@ -5353,10 +5353,10 @@ functional-red-black-tree@^1.0.1:
   resolved "https://registry.yarnpkg.com/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz#1b0ab3bd553b2a0d6399d29c0e3ea0b252078327"
   integrity sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=
 
-gamenet-material@^0.2.10:
-  version "0.2.10"
-  resolved "https://registry.yarnpkg.com/gamenet-material/-/gamenet-material-0.2.10.tgz#c254cd0248f0ea8e3f256c7ef8e27be5a23f4e3c"
-  integrity sha512-7mVxNDIJ+8oSAoGW8PP/VSMZuupX0ThkJxffcXsWIsJA4lYmmV8HhMJ16kzqe9max5gFCTxT6QL3SKgj53naQA==
+gamenet-material@^0.2.12:
+  version "0.2.12"
+  resolved "https://registry.yarnpkg.com/gamenet-material/-/gamenet-material-0.2.12.tgz#d903a4f8a75fb2d2d28796e89e8326dd75f89870"
+  integrity sha512-d2k/2T6AkUMu3gSJQLxr5ST33h69jxQN/LKBgLbLLbY8fPqvrOXp3NJecaYymul6hAQpXKYdPAjmAiv+8wlfJw==
 
 gamenet@^0.2.7:
   version "0.2.7"
