@@ -1,9 +1,9 @@
-import React, { FunctionComponent, useEffect, useState } from 'react'
+import React, { FunctionComponent, useEffect, useMemo, useState } from 'react'
 import { usePoker99 } from './withGameNetwork'
 import { GameAction, GameActionType, PlayCardPayload } from './GameAction'
 import { ChooseCardFor, Deck } from './components/Deck'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core'
-import { decodeError } from './utils'
+import { checkAbleToRespond, decodeError } from './utils'
 import { useGamenetI18n } from 'gamenet-material'
 import { IDeck } from './types'
 
@@ -79,6 +79,7 @@ export const Game: FunctionComponent = () => {
       type: GameActionType.END
     }).catch(handleError)
   }
+  const ableToRespond = useMemo(() => checkAbleToRespond(state), [state])
   let chooseCardFor = ChooseCardFor.RESPOND_PLAY
   if(state.stage.length === 0) {
     chooseCardFor = ChooseCardFor.FIRST_PLAY
@@ -113,6 +114,7 @@ export const Game: FunctionComponent = () => {
         takeHit={takeHit}
         myTurn={myTurn}
         onReorder={onReorder}
+        ableToRespond={ableToRespond}
       />}
       <div style={{ maxHeight: '50%' }}>
         {state.logs.slice().reverse().map((s, k) => <div key={k}>{s}</div>)}

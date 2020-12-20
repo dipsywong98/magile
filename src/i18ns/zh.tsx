@@ -78,5 +78,7 @@ export const zh = {
   damage: '傷害',
   damageTableHint: '打出一張引爆卡後，其後每張引爆傷害+1。大決戰其間傷害+1',
   damageTable: '傷害表',
-  close: '關閉'
+  close: '關閉',
+  notAbleToRespond: '沒有可以響應的卡',
+  hit$playerWith$damage: '命中{{player}}並造成{{damage}}點傷害'
 }

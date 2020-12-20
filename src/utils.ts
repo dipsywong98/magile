@@ -191,3 +191,37 @@ export const reorderInPlace = <T>(list: T[], startIndex: number, endIndex: numbe
     list[i] = result[i]
   }
 };
+
+export const checkAbleToRespond = (state: GameState): boolean => {
+  const { ignited, duel, turn, mode } = state
+  if(!state.started) {
+    return false
+  }
+  const hand = state.playerDeck[turn]
+  if (!duel && !!hand.find(card => card === ICard.ANGEL_GUARD)) {
+    return true
+  }
+  if (mode === IMode.HETERO) {
+    if (!duel && !!hand.find(card => card === ICard.HETERO_IGNITE)) {
+      return true
+    }
+    if (ignited) {
+      return hand.includes(ICard.HETERO_IGNITE)
+    }
+    return hand
+      .filter(card => getCardColor(card) !== ICardColor.NONE)
+      .filter(card => duel ? getCardType(card) !== ICardType.MAGILE : true)
+      .filter(card => areCardsOfTypeOrMagile([card], getCardType(state.stage[0])))
+      .filter(card => !state.stage.map(card => getCardColor(card)).includes(getCardColor(card))).length > 0
+  } else {
+    if (!duel && !!hand.find(card => card === ICard.HOMO_IGNITE)) {
+      return true
+    }
+    if (ignited) {
+      return hand.includes(ICard.HOMO_IGNITE)
+    }
+    return hand
+      .filter(card => getCardColor(card) === getCardColor(state.stage[0]))
+      .length > 0
+  }
+}

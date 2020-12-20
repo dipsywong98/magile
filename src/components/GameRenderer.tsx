@@ -13,7 +13,7 @@ export const GameRenderer = () => {
   const [prevCardPayload, setPrevCardPayload] = useState<null | IDeck>(null)
   const [startAnimateCard, setStartAnimateCard] = useState(false)
   const [showAnimateCard, setShowAnimateCard] = useState(false)
-  const {i18n} = useGamenetI18n()
+  const { i18n } = useGamenetI18n()
   useEffect(() => {
     setShowAnimateCard(true)
     setTimeout(() => {
@@ -37,33 +37,36 @@ export const GameRenderer = () => {
   }
   const status = (() => {
     if (state.started) {
-      if(state.winner !== null) {
+      if (state.winner !== null) {
         const player = state.players[state.winner]
-        return i18nSub(i18n.loserIs$player, {player})
+        return i18nSub(i18n.loserIs$player, { player })
       }
       const player = state.players[state.turn]
       if (state.playerDeck[state.turn].length > state.playerHp[state.turn]) {
-        return i18nSub(i18n.$playerDiscardCardTil$cardCount, {player, cardCount: `${state.playerHp[state.turn]}`})
+        return i18nSub(i18n.$playerDiscardCardTil$cardCount, { player, cardCount: `${state.playerHp[state.turn]}` })
       }
       if (state.stage.length === 0) {
-        return i18nSub(i18n.$playerInitializingTransfer, {player})
+        return i18nSub(i18n.$playerInitializingTransfer, { player })
       } else {
         const mode = i18n[state.mode ?? IMode.HOMO]
-        return i18nSub(i18n.$playerRespondTo$modeTransfer, {player, mode})
+        return i18nSub(i18n.$playerRespondTo$modeTransfer, { player, mode })
       }
     }
     return undefined
   })()
   const damage = useMemo(() => `${computeDamage(state)}`, [state])
   const hint = (() => {
-    if(state.started) {
-      if(state.winner !== null) {
+    if (state.started) {
+      if (state.playerDeck[state.turn].length > state.playerHp[state.turn]) {
+        return i18nSub(i18n.hit$playerWith$damage, { player: state.players[state.turn], damage })
+      }
+      if (state.winner !== null) {
         return i18n.gameOver
       }
-      if(state.duel) {
+      if (state.duel) {
         return i18n.duelHint
       }
-      if(state.ignited) {
+      if (state.ignited) {
         return i18n.ignitedHint
       }
     }
@@ -86,20 +89,20 @@ export const GameRenderer = () => {
           boxShadow: state.duel ? 'inset 0 0 100px #ff9d9d' : undefined,
           transition: 'box-shadow 0.3s ease-in-out'
         }}>
-      <div style={{display: 'flex', justifyContent: 'space-around', margin: 'auto'}}>
-        {
-          new Array(state.players.length).fill(0).map((_, k) => mp(k + (myPlayerId ?? 0))).filter(id => id !== (myPlayerId ?? 0)).map(id => (
-            <div style={{border: `solid ${state.turn === id ? 'red' : 'transparent'} 2px`, padding: '16px 32px'}}>
-              <div>
-                {state.players[id]}
+        <div style={{ display: 'flex', justifyContent: 'space-around', margin: 'auto' }}>
+          {
+            new Array(state.players.length).fill(0).map((_, k) => mp(k + (myPlayerId ?? 0))).filter(id => id !== (myPlayerId ?? 0)).map(id => (
+              <div style={{ border: `solid ${state.turn === id ? 'red' : 'transparent'} 2px`, padding: '16px 32px' }}>
+                <div>
+                  {state.players[id]}
+                </div>
+                <div>
+                  hp: {state.playerHp[id]}
+                </div>
               </div>
-              <div>
-                hp: {state.playerHp[id]}
-              </div>
-            </div>
-          ))
-        }
-      </div>
+            ))
+          }
+        </div>
         {/*{myPlayerId === undefined && <Name offset={0}/>}*/}
         {prevCardPayload !== null &&
         <div style={{ position: 'absolute', ...center }}>
@@ -109,9 +112,18 @@ export const GameRenderer = () => {
             {state.winner !== undefined && state.winner !== null && <div>
               <Button variant="contained" color='primary' onClick={again}>{i18n.again}</Button>
             </div>}
-            <h3>{state.mode && `${i18n[state.mode]}, `}{i18nSub(i18n.current$damage, {damage})}</h3>
-            <div style={{ display: 'flex', justifyContent: 'center', maxWidth: 'calc(100vw - 32px)', flexWrap: 'wrap', marginRight: 'auto', marginLeft: 'auto', marginBottom: '70px' }}>
-              {prevCardPayload.map(card => <div style={{ padding: '8px', maxHeight: '70px' }}><Card card={card} disabled/></div>)}
+            <h3>{state.mode && `${i18n[state.mode]}, `}{i18nSub(i18n.current$damage, { damage })}</h3>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              maxWidth: 'calc(100vw - 32px)',
+              flexWrap: 'wrap',
+              marginRight: 'auto',
+              marginLeft: 'auto',
+              marginBottom: '70px'
+            }}>
+              {prevCardPayload.map(card => <div style={{ padding: '8px', maxHeight: '70px' }}><Card card={card} disabled/>
+              </div>)}
             </div>
           </div>
         </div>}
@@ -126,7 +138,24 @@ export const GameRenderer = () => {
             {state.lastAction.cards.map(card => <div style={{ padding: '8px' }}><Card card={card} disabled/></div>)}
           </div>
         </div>}
-        <h3 style={{ position: 'absolute', bottom: 0, right: '20px' }}>{i18n.drawDeck}: {state.drawDeck.length}</h3>
+        <h3 style={{
+          position: 'absolute',
+          bottom: 0,
+          right: '20px',
+          textAlign: 'right',
+          border: `solid ${state.turn === (myPlayerId ?? 0) ? 'red' : 'transparent'} 2px`,
+          padding: '16px 32px'
+        }}>
+          <div>
+            {i18n.name}: {state.players[myPlayerId ?? 0]}
+          </div>
+          <div>
+            hp: {state.playerHp[myPlayerId ?? 0]}
+          </div>
+          <div>
+            {i18n.drawDeck}: {state.drawDeck.length}
+          </div>
+        </h3>
         <DamageTableToggleButton/>
       </div>
   )

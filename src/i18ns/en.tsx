@@ -78,5 +78,7 @@ export const en = {
   damage: 'Damage',
   damageTableHint: 'After playing first ignite in the transfer, each additional ignite damage+1; during duel damage+1.',
   damageTable: 'Damage Table',
-  close: 'close'
+  close: 'close',
+  notAbleToRespond: 'Not able to respond',
+  hit$playerWith$damage: 'Hit {{player}} causing {{damage}} damage'
 }

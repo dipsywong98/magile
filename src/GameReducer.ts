@@ -247,8 +247,8 @@ const withPlayCard: (playerId: number, payload: PlayCardPayload) => IStateMapper
     throw buildError('notYourTurn')
   }
   const nextState = compose(
-    withCheckWin,
-    withCheckHit,
+    // withCheckWin,
+    // withCheckHit,
     withIncrementTurn,
     withEnsureDuelNotFunctionCard(playerId),
     withDrawCard(playerId),
@@ -276,44 +276,13 @@ export const withCheckWin: IStateMapper = state => {
   return state
 }
 
-export const withCheckHit: IStateMapper = prevState => {
-  if (ableToResponse(prevState)) {
-    return prevState
-  } else {
-    return withHit(prevState)
-  }
-}
-
-const ableToResponse = (state: GameState): boolean => {
-  const { ignited, duel, turn, mode } = state
-  const hand = state.playerDeck[turn]
-  if (!duel && !!hand.find(card => card === ICard.ANGEL_GUARD)) {
-    return true
-  }
-  if (mode === IMode.HETERO) {
-    if (!duel && !!hand.find(card => card === ICard.HETERO_IGNITE)) {
-      return true
-    }
-    if (ignited) {
-      return hand.includes(ICard.HETERO_IGNITE)
-    }
-    return hand
-      .filter(card => getCardColor(card) !== ICardColor.NONE)
-      .filter(card => duel ? getCardType(card) !== ICardType.MAGILE : true)
-      .filter(card => areCardsOfTypeOrMagile([card], getCardType(state.stage[0])))
-      .filter(card => !state.stage.map(card => getCardColor(card)).includes(getCardColor(card))).length > 0
-  } else {
-    if (!duel && !!hand.find(card => card === ICard.HOMO_IGNITE)) {
-      return true
-    }
-    if (ignited) {
-      return hand.includes(ICard.HOMO_IGNITE)
-    }
-    return hand
-      .filter(card => getCardColor(card) === getCardColor(state.stage[0]))
-      .length > 0
-  }
-}
+// export const withCheckHit: IStateMapper = prevState => {
+//   if (ableToResponse(prevState)) {
+//     return prevState
+//   } else {
+//     return withHit(prevState)
+//   }
+// }
 
 const withHit = (state: GameState): GameState => {
   if (state.mode !== null) {

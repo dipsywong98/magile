@@ -1,4 +1,4 @@
-import React, { FunctionComponent, ReactNode, useEffect, useReducer, useState } from 'react'
+import React, { FunctionComponent, ReactNode, useEffect, useMemo, useReducer, useState } from 'react'
 import { ICard, IDeck, IMode } from '../types'
 import { Card } from './Card'
 import { Button } from '@material-ui/core'
@@ -36,8 +36,8 @@ export enum ChooseCardFor {
 }
 
 export const Deck: FunctionComponent<{
-  cards: ICard[], hide: boolean, reveal: () => void, onCardsChoose: (payload: PlayCardPayload) => Promise<void>, chooseCardFor: ChooseCardFor, takeHit: () => Promise<void>, myTurn?: boolean, onReorder: (cards: IDeck) => Promise<void>
-}> = ({ cards, hide, reveal, onCardsChoose, chooseCardFor, takeHit, myTurn, onReorder }) => {
+  cards: ICard[], hide: boolean, reveal: () => void, onCardsChoose: (payload: PlayCardPayload) => Promise<void>, chooseCardFor: ChooseCardFor, takeHit: () => Promise<void>, myTurn?: boolean, onReorder: (cards: IDeck) => Promise<void>, ableToRespond: boolean
+}> = ({ cards, hide, reveal, onCardsChoose, chooseCardFor, takeHit, myTurn, onReorder, ableToRespond }) => {
   const [playedIndices, setPlayedIndices] = useState<number[]>([])
   const [hovering, setHovering] = useState<number | null>(null)
   const [playGetCardAnimation, setPlayGetCardAnimation] = useState(false)
@@ -162,7 +162,7 @@ export const Deck: FunctionComponent<{
           <Button variant='contained'
                   title={i18n.takeHit}
                   color='secondary'
-                  onClick={() => window.confirm(i18n.areYouSureYouWantToTakeHit) && takeHit().catch(console.error)}
+                  onClick={() => (!ableToRespond || window.confirm(i18n.areYouSureYouWantToTakeHit)) && takeHit().catch(console.error)}
           >
             <Flag/>
           </Button>
@@ -173,6 +173,7 @@ export const Deck: FunctionComponent<{
           >
             <PlayArrow/>
           </Button>
+          {!ableToRespond && <div style={{marginLeft: '8px'}}>({i18n.notAbleToRespond})</div>}
         </>}
         {!hide && chooseCardFor === ChooseCardFor.FIRST_PLAY && <>
           <Button variant='contained'
