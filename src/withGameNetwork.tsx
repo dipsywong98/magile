@@ -9,7 +9,7 @@ const Poker99Context = createContext<BoardGameContextInterface<GameState, GameAc
 
 export const withGameNetwork = (Component: FunctionComponent): FunctionComponent => {
   const WithGameNetwork: FunctionComponent = props => {
-    const network = useBoardGameNetwork(GameReducer, new GameState())
+    const network = useBoardGameNetwork(GameReducer, new GameState(), undefined, 'magile')
     const {myAis, state,dispatchAs} = network
     useEffect(() => {
       if (aiAction !== undefined && myAis.includes(state.players[state.turn]) && state.started && state.winner === null) {
