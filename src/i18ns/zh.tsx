@@ -1,5 +1,4 @@
 import { gamenetI18n } from 'gamenet-material'
-import React from 'react'
 import { ICard, ICardColor, ICardType, IMode } from '../types'
 import { howToPlay } from './howToPlay.zh'
 

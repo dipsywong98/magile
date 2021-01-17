@@ -74,11 +74,6 @@ export const Game: FunctionComponent = () => {
       setTrottledRenderedId(renderedDeckId)
     }, 500)
   }, [renderedDeckId, myPlayerId])
-  const again = async (): Promise<void> => {
-    await dispatch({
-      type: GameActionType.END
-    }).catch(handleError)
-  }
   const ableToRespond = useMemo(() => checkAbleToRespond(state), [state])
   let chooseCardFor = ChooseCardFor.RESPOND_PLAY
   if(state.stage.length === 0) {
