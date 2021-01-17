@@ -5,7 +5,6 @@ import { Game } from './Game'
 import { GameRenderer } from './components/GameRenderer'
 import { i18ns } from './i18ns'
 import { DialogContent } from '@material-ui/core'
-import { DamageTable } from './DamageTable'
 import { withLobby } from 'gamenet'
 
 const App: FunctionComponent = withLobby(withGamenetI18n({ i18ns })(withGameNetwork(() => {

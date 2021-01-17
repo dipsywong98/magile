@@ -8,7 +8,7 @@ import { Button } from '@material-ui/core'
 import { i18nSub, useGamenetI18n } from 'gamenet-material'
 import { DamageTableToggleButton } from '../DamageTableToggleButton'
 
-export const GameRenderer = () => {
+export const GameRenderer: FunctionComponent = () => {
   const { state, myPlayerId, dispatch } = usePoker99()
   const [prevCardPayload, setPrevCardPayload] = useState<null | IDeck>(null)
   const [startAnimateCard, setStartAnimateCard] = useState(false)
@@ -24,7 +24,7 @@ export const GameRenderer = () => {
       setStartAnimateCard(false)
       setShowAnimateCard(false)
     }, 300)
-  }, [state.lastAction])
+  }, [state.lastAction, state.stage])
   const mp = (id: number): number => (id + state.playerHp.length) % state.playerHp.length
   const center = {
     top: '50vh',

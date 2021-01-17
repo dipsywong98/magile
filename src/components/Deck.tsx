@@ -1,4 +1,4 @@
-import React, { FunctionComponent, ReactNode, useEffect, useMemo, useReducer, useState } from 'react'
+import React, { FunctionComponent, ReactNode, useEffect, useReducer, useState } from 'react'
 import { ICard, IDeck, IMode } from '../types'
 import { Card } from './Card'
 import { Button } from '@material-ui/core'

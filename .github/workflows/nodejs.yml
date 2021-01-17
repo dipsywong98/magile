@@ -26,6 +26,13 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: yarn install --frozen-lockfile
     - run: yarn build
+      env:
+        REACT_APP_PEER_HOST: {{secrets.REACT_APP_PEER_HOST}}
+        REACT_APP_PEER_PORT: 443
+        REACT_APP_PEER_PATH: /
+        REACT_APP_PEER_SECURE: true
+        REACT_APP_PEER_CONFIG: {{secrets.REACT_APP_PEER_CONFIG}}
+        REACT_APP_SMNET_VERBOSE_ALL_NO_HISTORY: true
     - uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
