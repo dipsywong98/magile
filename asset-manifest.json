@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/magile/static/css/main.6dea0f05.chunk.css",
-    "main.js": "/magile/static/js/main.66684ad3.chunk.js",
-    "main.js.map": "/magile/static/js/main.66684ad3.chunk.js.map",
+    "main.js": "/magile/static/js/main.aa2d8cb2.chunk.js",
+    "main.js.map": "/magile/static/js/main.aa2d8cb2.chunk.js.map",
     "runtime-main.js": "/magile/static/js/runtime-main.01791a29.js",
     "runtime-main.js.map": "/magile/static/js/runtime-main.01791a29.js.map",
     "static/js/2.c4338e31.chunk.js": "/magile/static/js/2.c4338e31.chunk.js",
@@ -32,6 +32,6 @@
     "static/js/runtime-main.01791a29.js",
     "static/js/2.c4338e31.chunk.js",
     "static/css/main.6dea0f05.chunk.css",
-    "static/js/main.66684ad3.chunk.js"
+    "static/js/main.aa2d8cb2.chunk.js"
   ]
 }
