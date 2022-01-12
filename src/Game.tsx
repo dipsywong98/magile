@@ -73,7 +73,10 @@ export const Game: FunctionComponent = () => {
     setTimeout(() => {
       setTrottledRenderedId(renderedDeckId)
     }, 500)
-  }, [renderedDeckId, myPlayerId])
+  }, [renderedDeckId])
+  useEffect(() => {
+    setTrottledRenderedId(myPlayerId)
+  }, [myPlayerId])
   const ableToRespond = useMemo(() => checkAbleToRespond(state), [state])
   let chooseCardFor = ChooseCardFor.RESPOND_PLAY
   if(state.stage.length === 0) {
