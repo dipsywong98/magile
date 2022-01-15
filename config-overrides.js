@@ -1,6 +1,7 @@
+const rewiredEsbuild = require('react-app-rewired-esbuild');
 const webpack = require('./node_modules/webpack')
 
-module.exports = function override (config, env) {
+module.exports = function override(config, env) {
   if (!config.plugins) {
     config.plugins = []
   }
@@ -14,5 +15,5 @@ module.exports = function override (config, env) {
     )
   )
 
-  return config
+  return rewiredEsbuild()(config, env)
 }
